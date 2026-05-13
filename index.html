@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Conducteur">
 <meta name="theme-color" content="#111c2d">
-<title>Journal Conducteur Autocar 1.0</title>
+  <title>Journal Conducteur Autocar 1.1</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;background:#0a1120;font-family:system-ui,-apple-system,'PingFang SC',sans-serif;color:#e8edf2;overflow:hidden}
@@ -135,6 +135,23 @@ select option{background:var(--bg2)}
 .rule-title{font-size:12.5px;font-weight:700;color:var(--text);margin-bottom:2px}
 .rule-title .cn{font-size:11px;color:var(--text2);font-weight:400}
 .rule-desc{font-size:11.5px;color:var(--text2);line-height:1.55}
+.rule-check{display:flex;gap:9px;align-items:flex-start;padding:10px 13px;border-bottom:1px solid var(--border);font-size:11.5px;color:var(--text2);line-height:1.5}
+.rule-check:last-child{border-bottom:none}
+.rule-check input{margin-top:2px;accent-color:var(--drive);flex-shrink:0}
+.rule-check b{color:var(--text)}
+.rule-link{color:var(--drive);text-decoration:none;font-weight:700}
+.memo-list{display:grid;gap:7px;margin-top:2px}
+.memo-step{display:grid;grid-template-columns:21px 1fr;gap:7px;padding:8px 9px;border:1px solid var(--border);border-radius:8px;background:var(--bg)}
+.memo-num{width:21px;height:21px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--drive-bg);color:var(--drive);font-weight:800;font-size:11px;border:1px solid var(--drive-b)}
+.memo-fr{display:block;color:var(--text);font-size:11.5px;font-weight:700;line-height:1.4}
+.memo-cn{display:block;color:var(--text2);font-size:11px;line-height:1.45;margin-top:2px}
+.rest-quick-box{display:none;margin:0 0 13px;padding:11px;border:1px solid var(--green-b);border-radius:10px;background:var(--green-bg)}
+.rest-quick-title{font-size:12.5px;font-weight:800;color:var(--green);margin-bottom:3px}
+.rest-quick-title .cn{font-size:11px;color:var(--text2);font-weight:500;margin-left:4px}
+.rest-quick-hint{font-size:11px;color:var(--text2);line-height:1.45;margin-bottom:9px}
+.rest-quick-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.rest-quick-btn{border:1px solid var(--green-b);background:rgba(16,185,129,.18);color:var(--green);border-radius:9px;padding:12px 8px;font-family:inherit;font-weight:800;font-size:13px;line-height:1.25;cursor:pointer}
+.rest-quick-btn span{display:block;font-size:10.5px;color:var(--text2);font-weight:600;margin-top:3px}
 .rl{display:inline-block;font-size:10.5px;font-weight:700;padding:1px 6px;border-radius:4px;background:var(--bg3);color:var(--drive);border:1px solid var(--drive-b);margin:2px 2px 0 0}
 .rl-red{background:var(--red-bg);color:var(--red);border-color:var(--red-b)}
 .rl-green{background:var(--green-bg);color:var(--green);border-color:var(--green-b)}
@@ -211,7 +228,7 @@ select option{background:var(--bg2)}
   <div class="topbar">
     <div class="topbar-inner">
       <div class="topbar-left">
-        <h1>🚌 Journal Conducteur 1.0</h1>
+        <h1>🚌 Journal Conducteur 1.1</h1>
         <div class="sub" id="hdr-date"></div>
       </div>
       <div class="hdr-badge" id="hdr-badge" style="display:none"></div>
@@ -307,9 +324,28 @@ select option{background:var(--bg2)}
           <div class="rule-desc"><span class="rl">Lundi 00:00 → Dimanche 24:00</span><br>每周 56h、双周 90h、每周最多 2 次 10h 每日驾驶，按固定周计算，不按旅游团第几天计算。</div>
         </div></div>
         <div class="rule-row"><div class="rule-dot rd-ok"></div><div>
-          <div class="rule-title">Mémo terrain <span class="cn">现场口诀</span></div>
-          <div class="rule-desc"><span class="rl">9h/j</span><span class="rl">10h ×2/sem</span><span class="rl">56h/sem</span><span class="rl">90h/2 sem</span><br><span class="rl">4h30 puis 45min</span><span class="rl">Repos 11h ou 9h réduit</span><span class="rl">Hebdo 45h ou 24h compensé</span></div>
+          <div class="rule-title">Ordre de vérification terrain <span class="cn">现场检查顺序</span></div>
+          <div class="rule-desc">
+            <div class="memo-list">
+              <div class="memo-step"><div class="memo-num">1</div><div><span class="memo-fr">FR: Aujourd'hui — vérifier conduite ≤9h, ou 10h si l'extension hebdomadaire est encore disponible.</span><span class="memo-cn">中：先看今天驾驶是否 ≤9小时；如果超过 9小时，确认本固定周还有 10小时延长次数。</span></div></div>
+              <div class="memo-step"><div class="memo-num">2</div><div><span class="memo-fr">FR: Cycle conduite — après 4h30, pause tachy 45min ou fractionnement 15+30.</span><span class="memo-cn">中：看连续驾驶轮次，4小时30分后必须有 45分钟，或按记录仪保守逻辑 15+30。</span></div></div>
+              <div class="memo-step"><div class="memo-num">3</div><div><span class="memo-fr">FR: Repos journalier — 11h normal, 3h+9h fractionné, ou 9h réduit max 3 fois entre deux repos hebdo.</span><span class="memo-cn">中：每日休息看 11小时正常、3+9 拆分，或 9小时缩短；9小时缩短在两次周休之间最多 3 次。</span></div></div>
+              <div class="memo-step"><div class="memo-num">4</div><div><span class="memo-fr">FR: Semaine fixe — 10h max 2 fois, 56h par semaine, 90h sur deux semaines consécutives.</span><span class="memo-cn">中：固定周从周一 00:00 到周日 24:00；10小时每日驾驶最多 2 次，每周 56小时，连续两周 90小时。</span></div></div>
+              <div class="memo-step"><div class="memo-num">5</div><div><span class="memo-fr">FR: Repos hebdo — 45h normal ou ≥24h réduit; tout repos réduit crée une dette à compenser.</span><span class="memo-cn">中：周休可以 45小时正常，或至少 24小时缩短；缩短周休会产生补休债务，后面要接到休息上补回。</span></div></div>
+              <div class="memo-step"><div class="memo-num">6</div><div><span class="memo-fr">FR: Occasionnel 12 jours — seulement après un repos hebdo normal 45h; fin = 90h ou 69h + dette 21h.</span><span class="memo-cn">中：旅游包车 12天规则必须以前一个 45小时正常周休为前置；结束后休 90小时，或 69小时并欠 21小时补休。</span></div></div>
+              <div class="memo-step"><div class="memo-num">7</div><div><span class="memo-fr">FR: France — conduite, travail effectif et amplitude sont trois contrôles séparés.</span><span class="memo-cn">中：法国检查里，驾驶时间、实际工作时间、amplitude 幅度是三个不同概念，不能互相替代。</span></div></div>
+            </div>
+          </div>
         </div></div>
+      </div>
+
+      <div class="sl">Checklist départ / contrôle <span class="sl-cn">出车 / 路检准备</span></div>
+      <div class="rule-card">
+        <label class="rule-check"><input type="checkbox" data-rule-check="card"><span><b>Carte conducteur</b> insérée et activité correcte. 若几天没开车，先确认 repos / congé / absence 已能解释。</span></label>
+        <label class="rule-check"><input type="checkbox" data-rule-check="records56"><span><b>56 jours</b> contrôlables: aujourd'hui + 56 天内的驾驶、休息、请假、缺勤记录都能说明。</span></label>
+        <label class="rule-check"><input type="checkbox" data-rule-check="mission"><span><b>Occasionnel</b>: feuille de route / ordre de mission prêt si utilisation pause flexible, report 25h ou règle 12 jours.</span></label>
+        <label class="rule-check"><input type="checkbox" data-rule-check="debts"><span><b>Dettes repos</b>: 24h 周休或 69h 特殊恢复产生的补休已在程序里登记。</span></label>
+        <label class="rule-check"><input type="checkbox" data-rule-check="week"><span><b>Avant longue journée</b>: vérifier 10h conduite disponible, 56h semaine, 90h deux semaines et amplitude du service.</span></label>
       </div>
 
       <div class="sl">Conduite & pauses <span class="sl-cn">驾驶与暂停</span></div>
@@ -328,11 +364,11 @@ select option{background:var(--bg2)}
         </div></div>
         <div class="rule-row"><div class="rule-dot rd-info"></div><div>
           <div class="rule-title">Pause tourisme occasionnel 2024/1258 <span class="cn">旅游包车新分割</span></div>
-          <div class="rule-desc">Service occasionnel 可把 45min 替换为 <span class="rl">2 pauses ≥15min</span> 且总计 ≥45min。<br>例：20+25、30+15、15+30。重点是两次休息，不是简单 15+15+15。</div>
+          <div class="rule-desc">Service occasionnel 可把 45min 替换为 <span class="rl">2 pauses ≥15min</span> 且总计 ≥45min。<br>例：20+25、30+15、15+30。重点是两次休息，不是简单 15+15+15。<br><span class="rl rl-amber">程序实时清零仍按 tachy 保守逻辑</span>：45min 单段或 15+30，避免和你车上记录仪显示冲突。</div>
         </div></div>
         <div class="rule-row"><div class="rule-dot rd-warn"></div><div>
           <div class="rule-title">Nuit et conduite continue <span class="cn">夜间连续驾驶</span></div>
-          <div class="rule-desc">本程序按法国客运安全口径提示 <span class="rl">21h–6h: 4h</span>。法国夜间工作法定基础为 22h–5h，也可能由协议改为 21h–7h 内连续 7h。<br>使用 12 天规则时，若 <span class="rl">22h–6h</span> 单司机驾驶，应按 <span class="rl rl-red">3h 后休息</span> 或多司机。</div>
+          <div class="rule-desc">本程序按法国客运保守提示 <span class="rl">21h–6h: 4h</span>；不同协议/企业规则可能更严格。法国夜间工作基础常看 00h–05h 的工作时间限制。<br>使用 12 天规则时，若 <span class="rl">22h–6h</span> 单司机驾驶，应按 <span class="rl rl-red">3h 后休息</span> 或多司机处理。</div>
         </div></div>
       </div>
 
@@ -348,7 +384,7 @@ select option{background:var(--bg2)}
         </div></div>
         <div class="rule-row"><div class="rule-dot rd-info"></div><div>
           <div class="rule-title">Report 25h occasionnel <span class="cn">25h 日休延后</span></div>
-          <div class="rule-desc">单一 tourism occasionnel 行程 ≥6 个连续 24h 周期，可使用 1 次；≥8 个周期可使用 2 次。条件包括当天驾驶 ≤7h、不影响安全和工作条件。<br>这是延后日休开始，不是减少日休时长。</div>
+          <div class="rule-desc">单一 service occasionnel 行程 ≥6 个连续 24h 周期，可使用 1 次把日休开始延后到最多 25h；≥8 个周期可使用 2 次。条件包括当天驾驶 ≤7h、不影响安全和工作条件。<br>这是延后日休开始，不是减少日休时长，也不改变周休最晚开始时间。</div>
         </div></div>
       </div>
 
@@ -360,7 +396,7 @@ select option{background:var(--bg2)}
         </div></div>
         <div class="rule-row"><div class="rule-dot rd-warn"></div><div>
           <div class="rule-title">Compensation repos réduit <span class="cn">缩减周休补偿</span></div>
-          <div class="rule-desc">补偿 = <span class="rl">45h - 实际周休</span>。例如 24h 周休欠 <span class="rl rl-amber">21h</span>。<br>欠时必须在相关规则期限内补回，并连接到另一个休息时间上。</div>
+          <div class="rule-desc">补偿 = <span class="rl">45h - 实际周休</span>。例如 24h 周休欠 <span class="rl rl-amber">21h</span>。<br>欠时通常要在发生缩减周休后的第三周结束前补回，并连接到另一个至少 9h 的休息时间上。</div>
         </div></div>
         <div class="rule-row"><div class="rule-dot rd-warn"></div><div>
           <div class="rule-title">Cycle 6 × 24h <span class="cn">普通 6 天周期</span></div>
@@ -376,7 +412,7 @@ select option{background:var(--bg2)}
         </div></div>
         <div class="rule-row"><div class="rule-dot rd-warn"></div><div>
           <div class="rule-title">Ce que la règle permet <span class="cn">它允许什么</span></div>
-          <div class="rule-desc">允许把周休延后到最多 <span class="rl">12 个连续 24h 周期</span> 后。<br>它不是取消周休，也不是放宽每日 9/10h、56h、90h 上限。</div>
+          <div class="rule-desc">允许把周休延后到最多 <span class="rl">12 个连续 24h 周期</span> 后；2024/1258 后国内和国际 occasional passenger service 都可适用。<br>它不是取消周休，也不是放宽每日 9/10h、56h、90h 上限。</div>
         </div></div>
         <div class="rule-row"><div class="rule-dot rd-ok"></div><div>
           <div class="rule-title">Après 12 jours <span class="cn">结束后休多久</span></div>
@@ -428,7 +464,7 @@ select option{background:var(--bg2)}
       <div class="rule-card">
         <div class="rule-row"><div class="rule-dot rd-info"></div><div>
           <div class="rule-title">Textes utilisés <span class="cn">本页依据</span></div>
-          <div class="rule-desc">Reg. EC 561/2006 · Reg. EU 2024/1258 · Reg. EU 165/2014 · Directive 2002/15/EC · Code des transports · Légifrance · Commission européenne Mobility and Transport.</div>
+          <div class="rule-desc"><a class="rule-link" href="https://transport.ec.europa.eu/transport-modes/road/social-provisions/driving-time-and-rest-periods_en" target="_blank" rel="noopener">Commission européenne: conduite/repos</a><br><a class="rule-link" href="https://eur-lex.europa.eu/legal-content/EN/ALL/?uri=CELEX%3A32024R1258" target="_blank" rel="noopener">Reg. EU 2024/1258 occasionnel</a><br><a class="rule-link" href="https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000043651204" target="_blank" rel="noopener">Code des transports R3312-28 amplitude</a><br>Reg. EC 561/2006 · Reg. EU 165/2014 · Directive 2002/15/EC · Code des transports · Légifrance.</div>
         </div></div>
       </div>
     </div>
@@ -515,11 +551,12 @@ select option{background:var(--bg2)}
       <input type="checkbox" id="m-nextday" onchange="updateModalHint()">
     </div>
     <div id="modal-hint" style="font-size:11.5px;color:var(--text2);margin-bottom:11px;min-height:16px"></div>
-    <div id="rest-quick" style="display:none;margin-bottom:12px">
-      <div class="sl" style="margin:0 0 7px 2px">Repos fractionné <span class="sl-cn">拆分日休快捷</span></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px">
-        <button class="btn-sm bsm-edit" style="justify-content:center" onclick="quickRest(180)">+3h première partie 第一段</button>
-        <button class="btn-sm bsm-edit" style="justify-content:center" onclick="quickRest(540)">+9h deuxième partie 第二段</button>
+    <div id="rest-quick" class="rest-quick-box">
+      <div class="rest-quick-title">Repos fractionné 3h + 9h <span class="cn">拆分日休快捷</span></div>
+      <div class="rest-quick-hint">Sélectionne Repos puis utilise ces boutons pour calculer automatiquement l'heure de fin. 选择 Repos 后，可一键生成第一段 3h 或第二段 9h 的结束时间。</div>
+      <div class="rest-quick-grid">
+        <button class="rest-quick-btn" onclick="quickRest(180)">+3h 第一段<span>Première partie</span></button>
+        <button class="rest-quick-btn" onclick="quickRest(540)">+9h 第二段<span>Deuxième partie</span></button>
       </div>
     </div>
     <button class="btn btn-primary" style="margin-top:0" onclick="confirmSeg()">Confirmer 确认</button>
@@ -567,6 +604,19 @@ const LIMITS={
 function load(){try{return JSON.parse(localStorage.getItem(STORE)||'{}')}catch{return{}}}
 function save(d){try{localStorage.setItem(STORE,JSON.stringify(d))}catch{toast('Stockage plein 存储已满')}}
 let state=load();
+
+function toggleRuleCheck(key,el){
+  state._ruleCheck=state._ruleCheck||{};
+  state._ruleCheck[key]=!!el.checked;
+  save(state);
+}
+function initRuleChecklist(){
+  document.querySelectorAll('[data-rule-check]').forEach(el=>{
+    const key=el.getAttribute('data-rule-check');
+    el.checked=!!(state._ruleCheck&&state._ruleCheck[key]);
+    el.addEventListener('change',()=>toggleRuleCheck(key,el));
+  });
+}
 
 // ═══════════════════════════════════════════════════════
 // UTILS
@@ -1014,6 +1064,7 @@ function updateClock(){
 updateClock();
 setInterval(updateClock,30000);
 syncFromDate();
+initRuleChecklist();
 
 function onDateChange(){
   editDate=normalizeDateInput(document.getElementById('r-date').value);
@@ -1223,6 +1274,7 @@ function confirmSeg(){
   else{segs.push(seg);}
   segs.sort((a,b)=>segAbsStart(editDate,a)-segAbsStart(editDate,b));
   setSegs(segs);
+  if(modalType!=='R')syncAutoRestToFirstWork(editDate);
   save(state);
   closeModal();
   renderSegs();
@@ -1246,6 +1298,32 @@ function closePendingAutoRest(nextSeg,nextDate){
   segs.sort((a,b)=>segAbsStart(startDate,a)-segAbsStart(startDate,b));
   state[startDate].segs=segs;
   delete state._pendingRest;
+}
+function syncAutoRestToFirstWork(dateStr){
+  const day=state[dateStr];
+  if(!day||!day.segs||!day.segs.length)return;
+  const firstWork=(day.segs||[]).filter(s=>s.type!=='R'&&s.start&&s.end).sort((a,b)=>segAbsStart(dateStr,a)-segAbsStart(dateStr,b))[0];
+  if(!firstWork)return;
+  const firstAbs=segAbsStart(dateStr,firstWork);
+  let match=null;
+  Object.keys(state).filter(k=>state[k]&&state[k].segs).forEach(k=>{
+    (state[k].segs||[]).forEach((s,idx)=>{
+      if(!s.autoRest||s.autoRestOpen)return;
+      const st=segAbsStart(k,s);
+      if(st<firstAbs&&(!match||st>match.st))match={date:k,idx,seg:s,st};
+    });
+  });
+  if(!match)return;
+  const startBase=daySerial(match.date)*1440;
+  const endOffsetDays=Math.floor((firstAbs-startBase)/1440);
+  const next=Object.assign({},match.seg,{
+    end:absToHHMM(firstAbs),
+    nextDay:endOffsetDays>0,
+    endOffsetDays,
+    autoRest:true
+  });
+  delete next.autoRestOpen;
+  state[match.date].segs[match.idx]=next;
 }
 
 function startPendingRestAt(startSeg,dateStr){
@@ -1284,7 +1362,7 @@ function getSegs(){return(state[editDate]&&state[editDate].segs)||[]}
 function setSegs(s){if(!state[editDate])state[editDate]={};state[editDate].segs=s;}
 function deleteSegAt(idx){
   if(!confirm('Supprimer ce segment? 删除此段?'))return;
-  let segs=getSegs();segs.splice(idx,1);setSegs(segs);save(state);
+  let segs=getSegs();segs.splice(idx,1);setSegs(segs);syncAutoRestToFirstWork(editDate);save(state);
   renderSegs();renderLiveAlerts();toast('Supprimé 已删除');
 }
 
@@ -1656,6 +1734,9 @@ function compensationItems(){
 function compensationLabel(type){
   return type==='69'?'69h spécial: +21h':'24h réduit: +21h';
 }
+function hasSpecial12Prerequisite(){
+  return allTimelineEvents().some(e=>e.type==='R'&&e.dur>=2700);
+}
 function getWorkCycleCounters(){
   const normalDates=new Set(),specialDates=new Set();
   let specialReady=false;
@@ -1664,10 +1745,7 @@ function getWorkCycleCounters(){
       if(e.dur>=1440){
         normalDates.clear();
       }
-      if(state._special12&&e.dur>=4140){
-        specialReady=false;
-        specialDates.clear();
-      }else if(state._special12&&e.dur>=2700){
+      if(state._special12&&e.dur>=2700){
         specialReady=true;
         specialDates.clear();
       }
@@ -1814,7 +1892,8 @@ function render2Week(){
     <button class="btn-sm ${state._special12?'bsm-del':'bsm-add'}" onclick="toggleSpecial12()" style="flex-shrink:0">${state._special12?'Désactiver 关闭':'Activer 启用'}</button>
   </div></div>`;
   if(state._special12){
-    h+=cycleBox('Cycle spécial 12 jours','特殊行程 12 天周期',cycles.special12,12,`特殊周期已启用；本栏按 69h/90h 恢复休息重新开始计算。当前/最近休息：${minHM(displayRest.dur)} (${displayRest.label})。`,'Plus de 12 jours en service spécial 超过 12 天特殊行程');
+    const hasPrev45=hasSpecial12Prerequisite();
+    h+=cycleBox('Cycle spécial 12 jours','特殊行程 12 天周期',cycles.special12,12,`${hasPrev45?'已检测到 ≥45h 正常周休，12 天周期从该休息后开始。':'等待前置 45h 正常周休：法规要求 12 天规则必须先完成 45h 正常周休；未满足前保持 0/12。'} 当前/最近休息：${minHM(displayRest.dur)} (${displayRest.label})。`,'Plus de 12 jours en service spécial 超过 12 天特殊行程');
     h+=`<div class="week2-box">${restProgress('Repos spécial 90h 正常恢复',5400,'90','90h atteint 可清零12天周期')}${restProgress('Repos spécial minimum 69h 最低恢复',4140,'69','69h atteint 最低恢复达成')}</div>`;
   }
 
@@ -1839,8 +1918,10 @@ function render2Week(){
   h+='<tr><th>Date 日期</th><th>Conduite 驾驶</th><th>Repos 日休</th><th>Statut 状态</th></tr>';
   get30DayData().forEach(k=>{
     const day=state[k];
+    const rowStyle=k===today()?' style="background:var(--drive-bg)"':'';
+    const dateCell=`${fmtDate(k)}${k===today()?'<br><span style="font-size:10px;color:var(--drive);font-weight:700">Aujourd’hui 今日</span>':`<br><span style="font-size:10px;color:var(--text3)">${fmtDay(k)}</span>`}`;
     if(!day||!day.segs||!day.segs.length){
-      h+=`<tr><td style="color:var(--text3)">${fmtDate(k)}</td><td style="color:var(--text3)">—</td><td style="color:var(--text3)">—</td><td style="color:var(--text3)">—</td></tr>`;
+      h+=`<tr${rowStyle}><td style="color:var(--text3)">${dateCell}</td><td style="color:var(--text3)">—</td><td style="color:var(--text3)">—</td><td style="color:var(--text3)">—</td></tr>`;
       return;
     }
     const A=analyzeDay(day.segs,k);
@@ -1852,7 +1933,8 @@ function render2Week(){
     const rpC={norm:'ok',split:'',short:'warn',insuf:'err',none:''}[A.restType]||'';
     const restDur=A.dayRestInfo?A.dayRestInfo.dur:A.totalRest;
     const restTxt=restDur?`${minHM(restDur)}<br><span style="font-size:10px;font-weight:500;color:inherit">${rpL}</span>`:rpL;
-    h+=`<tr><td>${fmtDate(k)}</td><td class="${gCls(pct(A.totalDrive,LIMITS.driveDay))}">${minHM(A.totalDrive)}</td><td class="${rpC}">${restTxt}</td><td class="${sc}"${detail}>${st}</td></tr>`;
+    const workTxt=`${minHM(A.totalDrive)}<br><span style="font-size:10px;color:var(--text3);font-weight:500">Trav. ${minHM(A.totalWork)} · Amp. ${minHM(A.totalAmplitude)}</span>`;
+    h+=`<tr${rowStyle}><td>${dateCell}</td><td class="${gCls(pct(A.totalDrive,LIMITS.driveDay))}">${workTxt}</td><td class="${rpC}">${restTxt}</td><td class="${sc}"${detail}>${st}</td></tr>`;
   });
   h+='<tr><td colspan="4" style="font-size:10px;color:var(--text3);padding:6px 10px">Fenêtre centrée: J-15 → aujourd’hui → J+15. Repos: Normal · 3h+9h · Réduit · Insuff.</td></tr>';
   h+='</table></div>';
@@ -2052,11 +2134,11 @@ function toast(msg){
 // ═══════════════════════════════════════════════════════
 // PWA
 // ═══════════════════════════════════════════════════════
-const manifest={name:'Journal Conducteur Autocar 1.0',short_name:'Conducteur 1.0',start_url:'./',display:'standalone',background_color:'#111c2d',theme_color:'#111c2d',description:'Suivi temps de conduite & conformité CE 561/2006 - version 1.0',icons:[{src:"data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23111c2d'/><text y='.9em' font-size='80'>🚌</text></svg>",sizes:'any',type:'image/svg+xml',purpose:'any maskable'}]};
+const manifest={name:'Journal Conducteur Autocar 1.1',short_name:'Conducteur 1.1',start_url:'./',display:'standalone',background_color:'#111c2d',theme_color:'#111c2d',description:'Suivi temps de conduite & conformité CE 561/2006 - version 1.1',icons:[{src:"data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23111c2d'/><text y='.9em' font-size='80'>🚌</text></svg>",sizes:'any',type:'image/svg+xml',purpose:'any maskable'}]};
 const mblob=new Blob([JSON.stringify(manifest)],{type:'application/json'});
 const ml=document.createElement('link');ml.rel='manifest';ml.href=URL.createObjectURL(mblob);document.head.appendChild(ml);
 if('serviceWorker' in navigator){
-  const sw=`const C='cond-v13';const FILES=[self.location.pathname];self.addEventListener('install',e=>e.waitUntil(caches.open(C).then(c=>c.addAll(FILES))));self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==C).map(k=>caches.delete(k))))));self.addEventListener('fetch',e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).catch(()=>new Response('Offline',{status:503})))));`;
+  const sw=`const C='cond-v18';const FILES=[self.location.pathname];self.addEventListener('install',e=>e.waitUntil(caches.open(C).then(c=>c.addAll(FILES))));self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==C).map(k=>caches.delete(k))))));self.addEventListener('fetch',e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).catch(()=>new Response('Offline',{status:503})))));`;
   const swblob=new Blob([sw],{type:'application/javascript'});
   navigator.serviceWorker.register(URL.createObjectURL(swblob)).catch(()=>{});
 }
