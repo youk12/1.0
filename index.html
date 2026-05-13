@@ -1,0 +1,2065 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Conducteur">
+<meta name="theme-color" content="#111c2d">
+<title>Journal Conducteur Autocar 1.0</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:#0a1120;font-family:system-ui,-apple-system,'PingFang SC',sans-serif;color:#e8edf2;overflow:hidden}
+:root{
+  --nav:#111c2d;--nav2:#192437;
+  --bg:#0d1826;--bg2:#162030;--bg3:#1e2d42;--bg4:#243450;
+  --border:#253548;--border2:#2e4060;
+  --text:#e8edf2;--text2:#7a9bb8;--text3:#3d5a75;
+  --drive:#3b82f6;--drive-bg:#0e2040;--drive-b:#1d3f6e;
+  --pause:#f59e0b;--pause-bg:#2a1d08;--pause-b:#5a3d10;
+  --rest:#10b981;--rest-bg:#0a2218;--rest-b:#0f4a30;
+  --work:#8b5cf6;--work-bg:#1a1030;--work-b:#3d2070;
+  --avail:#06b6d4;--avail-bg:#081e28;--avail-b:#0e3a48;
+  --red:#ef4444;--red-bg:#2d0f0f;--red-b:#5a1a1a;
+  --green:#10b981;--green-bg:#0a2218;--green-b:#0f4a30;
+  --amber:#f59e0b;--amber-bg:#2a1d08;--amber-b:#5a3d10;
+  --radius:11px;--radius-sm:8px;
+}
+@media (prefers-color-scheme: light){
+  html,body{background:#dbe6f0;color:#132235}
+  :root{
+    --nav:#f8fafc;--nav2:#eef4f9;
+    --bg:#e8f0f7;--bg2:#ffffff;--bg3:#edf3f8;--bg4:#dde8f1;
+    --border:#c9d7e4;--border2:#b7cadb;
+    --text:#132235;--text2:#526a80;--text3:#7f95aa;
+    --drive:#2563eb;--drive-bg:#eaf1ff;--drive-b:#b8cffd;
+    --pause:#b45309;--pause-bg:#fff4df;--pause-b:#f1c77d;
+    --rest:#059669;--rest-bg:#e8f8f0;--rest-b:#9bd8bb;
+    --work:#7c3aed;--work-bg:#f1ebff;--work-b:#cab6ff;
+    --avail:#0891b2;--avail-bg:#e7f7fb;--avail-b:#a5dcea;
+    --red:#dc2626;--red-bg:#fff0f0;--red-b:#f3b0b0;
+    --green:#059669;--green-bg:#e8f8f0;--green-b:#9bd8bb;
+    --amber:#b45309;--amber-bg:#fff4df;--amber-b:#f1c77d;
+  }
+  .topbar-left h1{color:var(--text)}
+  .crow input,.crow select,.crow textarea,.tf input{color-scheme:light}
+  select option{background:#fff;color:var(--text)}
+  #toast{background:#132235;color:#fff}
+}
+#app{height:100dvh;display:flex;flex-direction:column;max-width:430px;margin:0 auto;background:var(--bg);position:relative}
+.topbar{background:var(--nav);border-bottom:1px solid var(--border);flex-shrink:0;padding-top:env(safe-area-inset-top,0)}
+.topbar-inner{padding:11px 15px 10px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.topbar-left h1{font-size:16px;font-weight:700;letter-spacing:-.01em;color:#fff}
+.topbar-left .sub{font-size:10.5px;color:var(--text2);margin-top:1px}
+.hdr-badge{font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;flex-shrink:0}
+.content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.tabbar{background:var(--nav);border-top:1px solid var(--border);display:grid;grid-template-columns:repeat(5,1fr);padding-bottom:env(safe-area-inset-bottom,0);flex-shrink:0}
+.tab{padding:7px 2px 9px;text-align:center;cursor:pointer;border:none;background:none;color:var(--text3);font-size:9.5px;line-height:1.4;transition:.15s;font-family:inherit}
+.tab svg{display:block;margin:0 auto 2px;width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.tab.active{color:var(--drive);font-weight:700}
+.screen{display:none;padding:13px 13px 24px}
+.screen.active{display:block}
+.sl{font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.09em;margin:16px 0 7px 2px;display:flex;align-items:center;justify-content:space-between}
+.sl:first-child{margin-top:0}
+.sl-cn{font-size:10px;color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0;margin-left:6px}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:10px;overflow:hidden}
+.crow{padding:10px 13px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;min-height:44px}
+.crow:last-child{border-bottom:none}
+.crow label{font-size:12.5px;color:var(--text2);flex-shrink:0;min-width:82px;line-height:1.3}
+.crow label .cn{display:block;font-size:10px;color:var(--text3);margin-top:1px}
+.crow input,.crow select,.crow textarea{flex:1;border:none;background:transparent;color:var(--text);font-size:14px;text-align:right;outline:none;font-family:inherit;min-width:0;color-scheme:dark}
+.crow textarea{resize:none;height:38px;text-align:left;font-size:13px;line-height:1.4;padding-top:2px}
+select option{background:var(--bg2)}
+.btn{width:100%;padding:12px;border-radius:var(--radius);border:none;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:7px;transition:.12s}
+.btn:active{transform:scale(.97);opacity:.85}
+.btn-primary{background:var(--drive);color:#fff;margin-top:4px}
+.btn-green{background:var(--rest);color:#fff;margin-top:4px}
+.btn-ghost{background:var(--bg2);color:var(--text2);border:1px solid var(--border);margin-top:8px}
+.btn-danger{background:var(--red-bg);color:var(--red);border:1px solid var(--red-b);margin-top:8px;font-size:13px;padding:10px}
+.btn-sm{padding:6px 11px;font-size:11.5px;font-weight:700;border-radius:6px;border:none;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:4px;transition:.12s}
+.btn-sm:active{transform:scale(.96)}
+.bsm-add{background:var(--drive-bg);color:var(--drive);border:1px solid var(--drive-b)}
+.bsm-del{background:var(--red-bg);color:var(--red);border:1px solid var(--red-b)}
+.bsm-edit{background:var(--bg3);color:var(--text2);border:1px solid var(--border2)}
+.tl-wrap{height:22px;display:flex;border-radius:7px;overflow:hidden;gap:1px;background:var(--border);margin-bottom:9px}
+.tl-seg{height:100%;transition:.3s;cursor:pointer}
+.tl-D{background:var(--drive)}.tl-P{background:var(--pause)}.tl-R{background:var(--rest)}.tl-W{background:var(--work)}.tl-A{background:var(--avail)}
+.seg-item{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:7px;overflow:hidden}
+.seg-header{display:flex;align-items:center;gap:8px;padding:9px 11px}
+.seg-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.seg-type-label{font-size:12px;font-weight:700;flex-shrink:0;min-width:68px}
+.seg-times{font-size:13px;font-weight:600;color:var(--text);flex:1}
+.seg-dur{font-size:12px;color:var(--text2);font-weight:600}
+/* Cross-day indicator */
+.seg-nextday{font-size:9.5px;background:var(--drive-bg);color:var(--drive);border:1px solid var(--drive-b);border-radius:4px;padding:1px 5px;margin-left:3px}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:10px}
+.stat-grid-3{grid-template-columns:1fr 1fr 1fr}
+.stat{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 11px}
+.stat-label{font-size:10px;color:var(--text2);margin-bottom:1px;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.stat-label .cn{font-size:9px;color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0}
+.stat-val{font-size:21px;font-weight:700;line-height:1.1;color:var(--text)}
+.stat-sub{font-size:10px;color:var(--text3);margin-top:2px}
+.sv-ok{color:var(--green)}.sv-warn{color:var(--amber)}.sv-err{color:var(--red)}
+.gauge{margin-bottom:10px}
+.gauge-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px}
+.gauge-label{font-size:12px;color:var(--text2)}
+.gauge-label .cn{font-size:10px;color:var(--text3)}
+.gauge-val{font-size:13px;font-weight:700}
+.gauge-track{height:5px;background:var(--bg3);border-radius:3px;overflow:hidden}
+.gauge-fill{height:100%;border-radius:3px;transition:.4s}
+.gf-ok{background:var(--green)}.gf-warn{background:var(--amber)}.gf-err{background:var(--red)}.gf-drive{background:var(--drive)}
+.alert{border-radius:var(--radius-sm);padding:9px 12px;margin-bottom:7px;font-size:12.5px;display:flex;align-items:flex-start;gap:8px;line-height:1.5}
+.alert svg{flex-shrink:0;margin-top:1px;width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.a-ok{background:var(--green-bg);color:var(--green);border:1px solid var(--green-b)}
+.a-warn{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-b)}
+.a-err{background:var(--red-bg);color:var(--red);border:1px solid var(--red-b)}
+.a-info{background:var(--drive-bg);color:var(--drive);border:1px solid var(--drive-b)}
+.hist-item{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:11px 13px;margin-bottom:8px;cursor:pointer;transition:.12s}
+.hist-item:active{opacity:.8}
+.hist-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:5px}
+.hist-date{font-size:13.5px;font-weight:700;color:var(--text)}
+.hist-sub{font-size:11.5px;color:var(--text2);margin-top:2px}
+.badges{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}
+.badge{font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:5px}
+.bd-ok{background:var(--green-bg);color:var(--green);border:1px solid var(--green-b)}
+.bd-warn{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-b)}
+.bd-err{background:var(--red-bg);color:var(--red);border:1px solid var(--red-b)}
+.bd-drive{background:var(--drive-bg);color:var(--drive);border:1px solid var(--drive-b)}
+.bd-gray{background:var(--bg3);color:var(--text2);border:1px solid var(--border)}
+.rule-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:10px;overflow:hidden}
+.rule-row{padding:9px 13px;border-bottom:1px solid var(--border);display:flex;gap:9px;align-items:flex-start}
+.rule-row:last-child{border-bottom:none}
+.rule-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.rd-ok{background:var(--green)}.rd-warn{background:var(--amber)}.rd-err{background:var(--red)}.rd-info{background:var(--drive)}
+.rule-title{font-size:12.5px;font-weight:700;color:var(--text);margin-bottom:2px}
+.rule-title .cn{font-size:11px;color:var(--text2);font-weight:400}
+.rule-desc{font-size:11.5px;color:var(--text2);line-height:1.55}
+.rl{display:inline-block;font-size:10.5px;font-weight:700;padding:1px 6px;border-radius:4px;background:var(--bg3);color:var(--drive);border:1px solid var(--drive-b);margin:2px 2px 0 0}
+.rl-red{background:var(--red-bg);color:var(--red);border-color:var(--red-b)}
+.rl-green{background:var(--green-bg);color:var(--green);border-color:var(--green-b)}
+.rl-amber{background:var(--amber-bg);color:var(--amber);border-color:var(--amber-b)}
+.empty{text-align:center;padding:45px 20px;color:var(--text3)}
+.empty .ico{font-size:42px;margin-bottom:10px;opacity:.35}
+.empty p{font-size:13px;line-height:1.65;color:var(--text2)}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;align-items:flex-end;justify-content:center}
+.overlay.open{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:16px 16px 0 0;padding:18px 14px calc(18px + env(safe-area-inset-bottom));width:100%;max-width:430px;max-height:88vh;overflow-y:auto}
+.modal h3{font-size:15px;font-weight:700;color:var(--text);margin-bottom:12px}
+.modal h3 .cn{font-size:12px;color:var(--text2);font-weight:400;margin-left:6px}
+.type-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:13px}
+.type-btn{padding:11px 8px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);cursor:pointer;text-align:center;font-family:inherit;transition:.15s}
+.type-btn.sel{border-width:2px}
+.tb-D.sel{border-color:var(--drive);background:var(--drive-bg)}
+.tb-P.sel{border-color:var(--pause);background:var(--pause-bg)}
+.tb-R.sel{border-color:var(--rest);background:var(--rest-bg)}
+.tb-W.sel{border-color:var(--work);background:var(--work-bg)}
+.tb-A.sel{border-color:var(--avail);background:var(--avail-bg)}
+.tb-label{font-size:12.5px;font-weight:700;margin-bottom:1px}
+.tb-cn{font-size:10.5px;color:var(--text2);margin-bottom:1px}
+.tb-sub{font-size:10px;color:var(--text3)}
+.tb-D .tb-label{color:var(--drive)}.tb-P .tb-label{color:var(--pause)}.tb-R .tb-label{color:var(--rest)}.tb-W .tb-label{color:var(--work)}.tb-A .tb-label{color:var(--avail)}
+.time-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:12px}
+.tf label{display:block;font-size:10.5px;color:var(--text2);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
+.tf input{width:100%;padding:10px;border-radius:8px;border:1px solid var(--border2);background:var(--bg3);color:var(--text);font-size:16px;text-align:center;outline:none;font-family:inherit;color-scheme:dark}
+.next-day-wrap{display:flex;align-items:center;gap:8px;margin-bottom:12px;padding:8px 10px;background:var(--drive-bg);border:1px solid var(--drive-b);border-radius:8px}
+.next-day-wrap label{font-size:12px;color:var(--drive);flex:1}
+.next-day-wrap input[type=checkbox]{width:18px;height:18px;accent-color:var(--drive)}
+.divider{height:1px;background:var(--border);margin:12px 0}
+#toast{position:fixed;bottom:85px;left:50%;transform:translateX(-50%) translateY(8px);background:#fff;color:#111;padding:9px 18px;border-radius:99px;font-size:13px;font-weight:700;opacity:0;transition:.22s;pointer-events:none;z-index:999;white-space:nowrap;box-shadow:0 4px 24px rgba(0,0,0,.4)}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.week2-box{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:12px 13px;margin-bottom:10px}
+.week2-title{font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.week2-title .cn{font-size:10px;color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0}
+.week2-row{margin-bottom:8px}
+.week2-row:last-child{margin-bottom:0}
+.sum-table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:10px}
+.sum-table th{background:var(--bg3);color:var(--text2);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:7px 10px;text-align:left;border-bottom:1px solid var(--border)}
+.sum-table td{padding:8px 10px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:top;line-height:1.4}
+.sum-table tr:last-child td{border-bottom:none}
+.sum-table td.ok{color:var(--green)}.sum-table td.warn{color:var(--amber)}.sum-table td.err{color:var(--red)}
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.card-reminder{background:var(--nav2);border:1px solid var(--drive-b);border-radius:var(--radius);padding:11px 13px;margin-bottom:10px;display:flex;align-items:center;gap:10px}
+.card-reminder-icon{font-size:24px;flex-shrink:0}
+.card-reminder-text{flex:1}
+.card-reminder-title{font-size:12.5px;font-weight:700;color:var(--drive)}
+.card-reminder-sub{font-size:11px;color:var(--text2);margin-top:2px}
+/* Cross-day chain indicator */
+.chain-indicator{background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:8px 11px;margin-bottom:8px;font-size:11.5px;color:var(--text2);display:flex;align-items:center;gap:7px}
+.chain-dot{width:8px;height:8px;border-radius:50%;background:var(--drive);flex-shrink:0}
+/* Rest type pills */
+.rest-pill{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;padding:2px 7px;border-radius:5px;margin-top:4px}
+.rp-norm{background:var(--green-bg);color:var(--green);border:1px solid var(--green-b)}
+.rp-split{background:var(--drive-bg);color:var(--drive);border:1px solid var(--drive-b)}
+.rp-short{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-b)}
+.rp-err{background:var(--red-bg);color:var(--red);border:1px solid var(--red-b)}
+.date-display{flex:1;text-align:right;font-size:14px;color:var(--text);font-weight:600;cursor:pointer;padding:6px 0}
+.cal-modal{max-width:320px;margin:0 auto 18px;border-radius:18px;background:var(--bg2);padding:14px;border:1px solid var(--border2);box-shadow:0 10px 40px rgba(0,0,0,.35)}
+.cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.cal-title{font-size:13px;font-weight:800;color:var(--text)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center}
+.cal-dow{font-size:10px;color:var(--text2);font-weight:700;padding:5px 0}
+.cal-day{border:none;background:transparent;color:var(--text);font:inherit;font-size:12px;font-weight:700;border-radius:99px;height:28px;cursor:pointer}
+.cal-day.muted{color:var(--text3)}
+.cal-day.sel{background:var(--red);color:#fff}
+.cal-day.today{outline:1px solid var(--drive)}
+.hidden-date{position:absolute;opacity:0;pointer-events:none;width:1px;height:1px}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="topbar-left">
+        <h1>🚌 Journal Conducteur 1.0</h1>
+        <div class="sub" id="hdr-date"></div>
+      </div>
+      <div class="hdr-badge" id="hdr-badge" style="display:none"></div>
+    </div>
+  </div>
+
+  <div class="content" id="main-content">
+
+    <!-- ══ SCREEN TODAY ══ -->
+    <div id="screen-today" class="screen active">
+      <div class="sl">Date & Trajet <span class="sl-cn">日期与行程</span></div>
+      <div class="card">
+        <div class="crow">
+          <label>Date <span class="cn">日期</span></label>
+          <button class="btn-sm bsm-edit" onclick="shiftDate(-1)" style="flex-shrink:0">−1</button>
+          <div id="r-date-display" class="date-display" onclick="openCalendar()"></div>
+          <input type="date" id="r-date" class="hidden-date" onchange="onDateChange()">
+          <button class="btn-sm bsm-edit" onclick="shiftDate(1)" style="flex-shrink:0">+1</button>
+        </div>
+        <div class="crow">
+          <label>Client/Groupe <span class="cn">客户/团名</span></label>
+          <input type="text" id="r-client" placeholder="ex: Groupe Martin">
+        </div>
+        <div class="crow">
+          <label>Trajet <span class="cn">行程</span></label>
+          <input type="text" id="r-route" placeholder="ex: Paris → Lyon">
+        </div>
+        <div class="crow">
+          <label>Type service <span class="cn">服务类型</span></label>
+          <select id="r-svctype" onchange="renderLiveAlerts()">
+            <option value="occ">Occasionnel 包车</option>
+            <option value="reg">Régulier 班车</option>
+            <option value="double">Double équipage 双人</option>
+          </select>
+        </div>
+        <div class="crow">
+          <label>Remarque <span class="cn">备注</span></label>
+          <textarea id="r-note" placeholder="Transfrontalier, nuit…"></textarea>
+        </div>
+      </div>
+
+      <div id="chain-info"></div>
+
+      <div class="sl">
+        Activités <span class="sl-cn">活动记录</span>
+        <button class="btn-sm bsm-add" onclick="openModal()">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Ajouter 添加
+        </button>
+      </div>
+
+      <div id="tl-wrap"></div>
+      <div id="seg-list"></div>
+      <button class="btn btn-green" onclick="markDayEndAutoRest()">
+        Fin de service → Repos auto 结束工作 → 自动日休
+      </button>
+      <button class="btn btn-ghost" onclick="exportDay(editDate)">Exporter cette journée 导出本日记录</button>
+      <button class="btn btn-danger" onclick="clearToday()">清空今日 Effacer ce jour</button>
+      <div id="live-alerts"></div>
+
+      <button class="btn btn-primary" onclick="saveDay()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        Enregistrer 保存
+      </button>
+      <button class="btn btn-ghost" onclick="goto('check')">Bilan du jour 查看今日报告</button>
+    </div>
+
+    <!-- ══ SCREEN CHECK ══ -->
+    <div id="screen-check" class="screen">
+      <div id="check-content"></div>
+    </div>
+
+    <!-- ══ SCREEN 2WEEKS ══ -->
+    <div id="screen-2w" class="screen">
+      <div id="twoweek-content"></div>
+    </div>
+
+    <!-- ══ SCREEN HISTORY ══ -->
+    <div id="screen-history" class="screen">
+      <div id="history-content"></div>
+    </div>
+
+    <!-- ══ SCREEN RULES ══ -->
+    <div id="screen-rules" class="screen">
+      <div class="sl">Priorité contrôle <span class="sl-cn">最先看这些</span></div>
+      <div class="rule-card">
+        <div class="rule-row"><div class="rule-dot rd-err"></div><div>
+          <div class="rule-title">3 compteurs différents <span class="cn">三个概念不能混</span></div>
+          <div class="rule-desc"><span class="rl rl-red">Conduite 驾驶</span><span class="rl">Travail effectif 工作</span><span class="rl">Amplitude 幅度</span><br>驾驶时间看 EU 561/2006；工作时间看法国/欧盟工作时间规则；amplitude 是从开始工作到结束工作的跨度。</div>
+        </div></div>
+        <div class="rule-row"><div class="rule-dot rd-warn"></div><div>
+          <div class="rule-title">Semaine fixe européenne <span class="cn">固定周</span></div>
+          <div class="rule-desc"><span class="rl">Lundi 00:00 → Dimanche 24:00</span><br>每周 56h、双周 90h、每周最多 2 次 10h 每日驾驶，按固定周计算，不按旅游团第几天计算。</div>
+        </div></div>
+        <div class="rule-row"><div class="rule-dot rd-ok"></div><div>
+          <div class="rule-title">Mémo terrain <span class="cn">现场口诀</span></div>
+          <div class="rule-desc"><span class="rl">9h/j</span><span class="rl">10h ×2/sem</span><span class="rl">56h/sem</span><span class="rl">90h/2 sem</span><br><span class="rl">4h30 puis 45min</span><span class="rl">Repos 11h ou 9h réduit</span><span class="rl">Hebdo 45h ou 24h compensé</span></div>
+        </div></div>
+      </div>
+
+      <div class="sl">Conduite & pauses <span class="sl-cn">驾驶与暂停</span></div>
+      <div class="rule-card">
+        <div class="rule-row"><div class="rule-dot rd-ok"></div><div>
+          <div class="rule-title">Conduite journalière <span class="cn">每日驾驶</span></div>
+          <div class="rule-desc"><span class="rl rl-green">9h normal</span><span class="rl">10h max 2 fois / semaine fixe</span><br>第三次 10h 在同一固定周内违法。例：周六、周日 10h 属上一周，周一、周二 10h 属新一周，可能仍合规。</div>
+        </div></div>
+        <div class="rule-row"><div class="rule-dot rd-warn"></div><div>
+          <div class="rule-title">Hebdo et bi-hebdo <span class="cn">每周与双周驾驶</span></div>
+          <div class="rule-desc"><span class="rl rl-red">56h / semaine fixe</span><span class="rl rl-red">90h / deux semaines consécutives</span><br>90h 是驾驶时间，不是工作时间，也不是休息时间。</div>
+        </div></div>
+        <div class="rule-row"><div class="rule-dot rd-warn"></div><div>
+          <div class="rule-title">Pause conduite ordinaire <span class="cn">普通驾驶暂停</span></div>
+          <div class="rule-desc">连续驾驶 <span class="rl">4h30</span> 后休 <span class="rl">45min</span>；普通分割为 <span class="rl">15min + 30min</span>。<br>普通规则下 20+25 不是 15+30 格式。</div>
+        </div></div>
+        <div class="rule-row"><div class="rule-dot rd-info"></div><div>
+          <div class="rule-title">Pause tourisme occasionnel 2024/1258 <span class="cn">旅游包车新分割</span></div>
+          <div class="rule-desc">Service occasionnel 可把 45min 替换为 <span class="rl">2 pauses ≥15min</span> 且总计 ≥45min。<br>例：20+25、30+15、15+30。重点是两次休息，不是简单 15+15+15。</div>
+        </div></div>
+        <div class="rule-row"><div class="rule-dot rd-warn"></div><div>
+          <div class="rule-title">Nuit et conduite continue <span class="cn">夜间连续驾驶</span></div>
+          <div class="rule-desc">本程序按法国客运安全口径提示 <span class="rl">21h–6h: 4h</span>。法国夜间工作法定基础为 22h–5h，也可能由协议改为 21h–7h 内连续 7h。<br>使用 12 天规则时，若 <span class="rl">22h–6h</span> 单司机驾驶，应按 <span class="rl rl-red">3h 后休息</span> 或多司机。</div>
+        </div></div>
+      </div>
+
+      <div class="sl">Repos journalier <span class="sl-cn">每日休息</span></div>
+      <div class="rule-card">
+        <div class="rule-row"><div class="rule-dot rd-ok"></div><div>
+          <div class="rule-title">Repos normal et fractionné <span class="cn">正常与拆分日休</span></div>
+          <div class="rule-desc"><span class="rl rl-green">11h consécutives</span> 或 <span class="rl">3h + 9h</span>，顺序必须先 3h 后 9h。<br>3h+9h 是日休分割，不是自动增加 amplitude；中间 3h 通常仍在当天 amplitude 内。</div>
+        </div></div>
+        <div class="rule-row"><div class="rule-dot rd-warn"></div><div>
+          <div class="rule-title">Repos quotidien réduit <span class="cn">9h 缩短日休</span></div>
+          <div class="rule-desc"><span class="rl">≥9h et &lt;11h</span><span class="rl rl-red">max 3 fois entre deux repos hebdo</span><br>不是按周一到周日算，也不是 12 天就自动有 6 次。每次周休后重新从 0 计算。9h 日休减少不需要补偿。</div>
+        </div></div>
+        <div class="rule-row"><div class="rule-dot rd-info"></div><div>
+          <div class="rule-title">Report 25h occasionnel <span class="cn">25h 日休延后</span></div>
+          <div class="rule-desc">单一 tourism occasionnel 行程 ≥6 个连续 24h 周期，可使用 1 次；≥8 个周期可使用 2 次。条件包括当天驾驶 ≤7h、不影响安全和工作条件。<br>这是延后日休开始，不是减少日休时长。</div>
+        </div></div>
+      </div>
+
+      <div class="sl">Repos hebdo & cycles <span class="sl-cn">周休与周期</span></div>
+      <div class="rule-card">
+        <div class="rule-row"><div class="rule-dot rd-ok"></div><div>
+          <div class="rule-title">Repos hebdomadaire <span class="cn">周休</span></div>
+          <div class="rule-desc"><span class="rl rl-green">45h normal</span><span class="rl">≥24h réduit</span><br>24h 缩减周休合法，并会重新开始周休周期和 9h 缩短日休计数，但必须补偿少掉的时间。</div>
+        </div></div>
+        <div class="rule-row"><div class="rule-dot rd-warn"></div><div>
+          <div class="rule-title">Compensation repos réduit <span class="cn">缩减周休补偿</span></div>
+          <div class="rule-desc">补偿 = <span class="rl">45h - 实际周休</span>。例如 24h 周休欠 <span class="rl rl-amber">21h</span>。<br>欠时必须在相关规则期限内补回，并连接到另一个休息时间上。</div>
+        </div></div>
+        <div class="rule-row"><div class="rule-dot rd-warn"></div><div>
+          <div class="rule-title">Cycle 6 × 24h <span class="cn">普通 6 天周期</span></div>
+          <div class="rule-desc">从上一次周休结束开始，最多 <span class="rl">6 个连续 24h 周期</span> 内必须开始新的周休。<br>周休周期不是固定周，不是按周一到周日。</div>
+        </div></div>
+      </div>
+
+      <div class="sl">Règle 12 jours occasionnel <span class="sl-cn">12 天旅游包车</span></div>
+      <div class="rule-card">
+        <div class="rule-row"><div class="rule-dot rd-info"></div><div>
+          <div class="rule-title">Quand l'utiliser <span class="cn">适用条件</span></div>
+          <div class="rule-desc">适用于 <span class="rl">service occasionnel / tourisme occasionnel</span>。2024/1258 后，符合条件的国内旅游包车也可适用，不再只限国际。<br>必须先完成前一个 <span class="rl rl-green">45h 正常周休</span>，期间仍要遵守每日驾驶、每日休息和 pause。</div>
+        </div></div>
+        <div class="rule-row"><div class="rule-dot rd-warn"></div><div>
+          <div class="rule-title">Ce que la règle permet <span class="cn">它允许什么</span></div>
+          <div class="rule-desc">允许把周休延后到最多 <span class="rl">12 个连续 24h 周期</span> 后。<br>它不是取消周休，也不是放宽每日 9/10h、56h、90h 上限。</div>
+        </div></div>
+        <div class="rule-row"><div class="rule-dot rd-ok"></div><div>
+          <div class="rule-title">Après 12 jours <span class="cn">结束后休多久</span></div>
+          <div class="rule-desc"><span class="rl rl-green">90h = 45h + 45h</span> 不欠补休。<br><span class="rl">69h = 45h + 24h</span>，因为 24h 是缩减周休，欠 <span class="rl rl-amber">21h</span>，需在结束后的 3 周内连接到另一个休息补回。</div>
+        </div></div>
+        <div class="rule-row"><div class="rule-dot rd-err"></div><div>
+          <div class="rule-title">Repos continu obligatoire <span class="cn">必须连续</span></div>
+          <div class="rule-desc">12 天结束后的 <span class="rl">90h</span> 或 <span class="rl">69h</span> 应连续完成，中间不能插入驾驶、装行李、接团或其他工作。<br>90h/69h 不是普通周休名称，只是 12 天规则结束后的特殊组合。</div>
+        </div></div>
+      </div>
+
+      <div class="sl">Amplitude & travail France <span class="sl-cn">法国幅度与工作时间</span></div>
+      <div class="rule-card">
+        <div class="rule-row"><div class="rule-dot rd-warn"></div><div>
+          <div class="rule-title">Amplitude voyageurs <span class="cn">客运 amplitude</span></div>
+          <div class="rule-desc">从开始工作到结束工作的整个跨度，包含驾驶、其他工作、等待、pause、disponibilité。<br><span class="rl">12h standard</span><span class="rl">14h occasionnel</span><span class="rl">18h multi-manning</span></div>
+        </div></div>
+        <div class="rule-row"><div class="rule-dot rd-info"></div><div>
+          <div class="rule-title">Travail effectif <span class="cn">实际工作时间</span></div>
+          <div class="rule-desc">包括驾驶、装行李、清洁/检查车辆、协助乘客、公司要求任务。通常不包括真正可自由支配的 repos/pause。disponibilité 需按具体安排判断。</div>
+        </div></div>
+        <div class="rule-row"><div class="rule-dot rd-warn"></div><div>
+          <div class="rule-title">Pause de travail <span class="cn">工作时间 pause</span></div>
+          <div class="rule-desc">工作 6h 到 9h：至少 <span class="rl">30min</span>；超过 9h：至少 <span class="rl">45min</span>；可分割，每段 ≥15min。<br>它可与 tachy 驾驶 pause 重合，但不能用来减少欧盟驾驶 pause。</div>
+        </div></div>
+        <div class="rule-row"><div class="rule-dot rd-warn"></div><div>
+          <div class="rule-title">Travail de nuit <span class="cn">夜间工作时间</span></div>
+          <div class="rule-desc">如果属于夜间劳动，或 24h 内有工作落在 <span class="rl">00h–05h</span>，日工作时间原则上不超过 <span class="rl rl-red">10h</span>。这是工作时间限制，不是驾驶时间限制。</div>
+        </div></div>
+      </div>
+
+      <div class="sl">Tachygraphe & documents <span class="sl-cn">记录仪与文件</span></div>
+      <div class="rule-card">
+        <div class="rule-row"><div class="rule-dot rd-info"></div><div>
+          <div class="rule-title">Contrôle 56 jours <span class="cn">56 天路检</span></div>
+          <div class="rule-desc">从 2024-12-31 起，路检可要求当天 + 前 <span class="rl">56 jours</span> 的活动记录。几个月没开车时，复工前也要能解释 congé/absence/repos，并用手动录入或证明补齐。</div>
+        </div></div>
+        <div class="rule-row"><div class="rule-dot rd-info"></div><div>
+          <div class="rule-title">Téléchargements entreprise <span class="cn">公司下载义务</span></div>
+          <div class="rule-desc">司机卡数据：最多每 <span class="rl">28 jours</span> 下载。车辆 tachy 数据：法国文本常见 <span class="rl">95 jours</span>，保守公司政策可用 90 天。下载数据至少保存 <span class="rl">365 jours</span>。</div>
+        </div></div>
+        <div class="rule-row"><div class="rule-dot rd-warn"></div><div>
+          <div class="rule-title">Feuille de route / ordre de mission <span class="cn">路单与任务单</span></div>
+          <div class="rule-desc">使用旅游包车新灵活规则时，尤其是新 pause 分割、25h 日休延后、12 天规则，应保留纸质或电子 journey form / feuille de route / ordre de mission，便于路检解释。</div>
+        </div></div>
+      </div>
+
+      <div class="sl">Sources résumées <span class="sl-cn">资料依据</span></div>
+      <div class="rule-card">
+        <div class="rule-row"><div class="rule-dot rd-info"></div><div>
+          <div class="rule-title">Textes utilisés <span class="cn">本页依据</span></div>
+          <div class="rule-desc">Reg. EC 561/2006 · Reg. EU 2024/1258 · Reg. EU 165/2014 · Directive 2002/15/EC · Code des transports · Légifrance · Commission européenne Mobility and Transport.</div>
+        </div></div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="tabbar">
+    <button class="tab active" onclick="goto('today')" id="tab-today">
+      <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+      今日<br>Auj.
+    </button>
+    <button class="tab" onclick="goto('check')" id="tab-check">
+      <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+      报告<br>Bilan
+    </button>
+    <button class="tab" onclick="goto('2w')" id="tab-2w">
+      <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="3" y1="14" x2="21" y2="14"/></svg>
+      两周<br>2 sem.
+    </button>
+    <button class="tab" onclick="goto('history')" id="tab-history">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      历史<br>Hist.
+    </button>
+    <button class="tab" onclick="goto('rules')" id="tab-rules">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      法规<br>Règles
+    </button>
+  </div>
+</div>
+
+<div class="overlay" id="cal-overlay" onclick="if(event.target.id==='cal-overlay')closeCalendar()">
+  <div class="cal-modal">
+    <div class="cal-head">
+      <button class="btn-sm bsm-edit" onclick="calShiftMonth(-1)">‹</button>
+      <div class="cal-title" id="cal-title"></div>
+      <button class="btn-sm bsm-edit" onclick="calShiftMonth(1)">›</button>
+    </div>
+    <div class="cal-grid" id="cal-grid"></div>
+  </div>
+</div>
+
+<!-- ══ SEGMENT MODAL ══ -->
+<div class="overlay" id="seg-modal">
+  <div class="modal">
+    <h3>Ajouter une activité <span class="cn">添加活动段</span></h3>
+    <div class="type-grid">
+      <button class="type-btn tb-D sel" onclick="selType('D',this)">
+        <div class="tb-label">🚌 Conduite</div>
+        <div class="tb-cn">驾驶</div>
+        <div class="tb-sub">Driving</div>
+      </button>
+      <button class="type-btn tb-P" onclick="selType('P',this)">
+        <div class="tb-label">⏸ Pause</div>
+        <div class="tb-cn">强制暂停</div>
+        <div class="tb-sub">≥15 min comptée</div>
+      </button>
+      <button class="type-btn tb-R" onclick="selType('R',this)">
+        <div class="tb-label">🛏 Repos</div>
+        <div class="tb-cn">日休</div>
+        <div class="tb-sub">≥9h / 11h / 3+9h</div>
+      </button>
+      <button class="type-btn tb-W" onclick="selType('W',this)">
+        <div class="tb-label">⚙️ Autre travail</div>
+        <div class="tb-cn">其他工作</div>
+        <div class="tb-sub">Chargement, admin…</div>
+      </button>
+      <button class="type-btn tb-A" onclick="selType('A',this)" style="grid-column:1/-1">
+        <div class="tb-label">⌛ Disponibilité</div>
+        <div class="tb-cn">待命</div>
+        <div class="tb-sub">Attente, co-pilote passif</div>
+      </button>
+    </div>
+    <div class="time-grid">
+      <div class="tf"><label>Début 开始</label><input type="time" id="m-start" oninput="updateModalHint()" onchange="updateModalHint()"></div>
+      <div class="tf"><label>Fin 结束</label><input type="time" id="m-end" oninput="updateModalHint()" onchange="updateModalHint()"></div>
+    </div>
+    <!-- Cross-day checkbox -->
+    <div class="next-day-wrap">
+      <label>Début le lendemain, rattaché à cette journée 次日凌晨开始，但计入本工作日</label>
+      <input type="checkbox" id="m-startnextday" onchange="updateModalHint()">
+    </div>
+    <div class="next-day-wrap">
+      <label>Fin le lendemain (après minuit) 结束时间跨到次日</label>
+      <input type="checkbox" id="m-nextday" onchange="updateModalHint()">
+    </div>
+    <div id="modal-hint" style="font-size:11.5px;color:var(--text2);margin-bottom:11px;min-height:16px"></div>
+    <div id="rest-quick" style="display:none;margin-bottom:12px">
+      <div class="sl" style="margin:0 0 7px 2px">Repos fractionné <span class="sl-cn">拆分日休快捷</span></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px">
+        <button class="btn-sm bsm-edit" style="justify-content:center" onclick="quickRest(180)">+3h première partie 第一段</button>
+        <button class="btn-sm bsm-edit" style="justify-content:center" onclick="quickRest(540)">+9h deuxième partie 第二段</button>
+      </div>
+    </div>
+    <button class="btn btn-primary" style="margin-top:0" onclick="confirmSeg()">Confirmer 确认</button>
+    <button class="btn btn-ghost" onclick="closeModal()">Annuler 取消</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════════════════
+const STORE='cond_v5';
+const TYPES={
+  D:{label:'Conduite',cn:'驾驶',color:'var(--drive)',dot:'#3b82f6'},
+  P:{label:'Pause',cn:'暂停',color:'var(--pause)',dot:'#f59e0b'},
+  R:{label:'Repos',cn:'日休',color:'var(--rest)',dot:'#10b981'},
+  W:{label:'Travail',cn:'工作',color:'var(--work)',dot:'#8b5cf6'},
+  A:{label:'Disponib.',cn:'待命',color:'var(--avail)',dot:'#06b6d4'},
+};
+const LIMITS={
+  driveDay:540,       // 9h normal
+  driveDayExt:600,    // 10h extended
+  driveCont:270,      // 4h30 continuous
+  driveContNight:240, // 4h night (coach/passenger transport, 21h-6h)
+  pauseMin:45,        // 45 min total pause required
+  pauseSegMin:15,     // each pause segment must be ≥15 min
+  ampStd:720,         // 12h amplitude
+  ampExt:840,         // 14h amplitude
+  ampDouble:1080,     // 18h double crew
+  restNorm:660,       // 11h normal rest
+  restSplit1:180,     // 3h first part of split rest
+  restSplit2:540,     // 9h second part of split rest
+  restRed:540,        // 9h reduced rest
+  restRedMax:3,       // max 3 reduced rests between weekly rests
+  weekDrive:3360,     // 56h/week
+  biweekDrive:5400,   // 90h/2 weeks
+  weekWork:2880,      // 48h/week
+};
+
+// ═══════════════════════════════════════════════════════
+// STORAGE
+// ═══════════════════════════════════════════════════════
+function load(){try{return JSON.parse(localStorage.getItem(STORE)||'{}')}catch{return{}}}
+function save(d){try{localStorage.setItem(STORE,JSON.stringify(d))}catch{toast('Stockage plein 存储已满')}}
+let state=load();
+
+// ═══════════════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════════════
+function localDateStr(d){
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function today(){return localDateStr(new Date())}
+function normalizeDateInput(v){
+  if(!v)return today();
+  if(/^\d{4}-\d{2}-\d{2}$/.test(v))return v;
+  const m=v.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})$/);
+  if(m)return`${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;
+  return today();
+}
+function fmtDay(s){if(!s)return'';try{return new Date(s+'T12:00').toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'})}catch{return s}}
+function fmtDate(s){if(!s)return'';const[y,m,d]=s.split('-');return`${d}/${m}/${y}`}
+function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function nowHHMM(){const d=new Date();return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')}
+function minHM(m){
+  if(m===null||m===undefined||isNaN(m)||m<0)return'—';
+  m=Math.round(m);const h=Math.floor(m/60),mn=m%60;
+  return mn?`${h}h${String(mn).padStart(2,'0')}`:`${h}h00`;
+}
+function pct(v,mx){return Math.min(100,Math.max(0,Math.round(v/mx*100)))}
+function gCls(p){return p>=100?'err':p>=85?'warn':'ok'}
+function gfCls(p){return p>=100?'gf-err':p>=85?'gf-warn':'gf-ok'}
+function iconOk(){return'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'}
+function iconWarn(){return'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'}
+function iconErr(){return'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>'}
+
+// Add minutes to a date string (YYYY-MM-DD) + minute offset → {date, hhmm}
+function addMinToDate(dateStr, startMin, addMin){
+  const totalMin=startMin+addMin;
+  const dayOver=Math.floor(totalMin/1440);
+  const d=new Date(dateStr+'T00:00:00');
+  d.setDate(d.getDate()+dayOver);
+  const hhmm=totalMin%1440;
+  const h=Math.floor(hhmm/60),m=hhmm%60;
+  return{date:localDateStr(d),hhmm:String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')};
+}
+function absToDate(absMin){
+  const d=new Date(Math.floor(absMin/1440)*86400000);
+  return d.toISOString().slice(0,10);
+}
+function absToHHMM(absMin){
+  const hhmm=((Math.round(absMin)%1440)+1440)%1440;
+  const h=Math.floor(hhmm/60),m=hhmm%60;
+  return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');
+}
+function addDaysStr(dateStr,days){
+  const d=new Date(dateStr+'T12:00:00');
+  d.setDate(d.getDate()+days);
+  return localDateStr(d);
+}
+
+// Convert hh:mm string to minutes since midnight
+function toMin(hhmm){if(!hhmm)return null;const[h,m]=hhmm.split(':').map(Number);return h*60+m;}
+
+// Compute segment duration respecting cross-day flag
+function segDur(s){
+  if(s.autoRestOpen)return 0;
+  if(!s.start||!s.end)return 0;
+  const endOffset=Number(s.endOffsetDays||0);
+  let d=(toMin(s.end)||0)-(toMin(s.start)||0);
+  if(endOffset>0)d+=1440*endOffset;
+  else if(s.nextDay||d<=0)d+=1440;
+  return d>0?d:0;
+}
+
+function daySerial(dateStr){
+  const[y,m,d]=dateStr.split('-').map(Number);
+  return Math.floor(Date.UTC(y,m-1,d)/86400000);
+}
+function effectiveStartNextDay(s){return !!s.startNextDay&&(toMin(s.start)||0)<720}
+function segAbsStart(dateStr,s){return daySerial(dateStr)*1440+(effectiveStartNextDay(s)?1440:0)+(toMin(s.start)||0)}
+function segAbsEnd(dateStr,s){
+  if(s.autoRestOpen)return segAbsStart(dateStr,s);
+  const st=segAbsStart(dateStr,s);
+  const endOffset=Number(s.endOffsetDays||0);
+  let en=daySerial(dateStr)*1440+(effectiveStartNextDay(s)?1440:0)+(toMin(s.end)||0);
+  if(endOffset>0)en=daySerial(dateStr)*1440+(effectiveStartNextDay(s)?1440:0)+endOffset*1440+(toMin(s.end)||0);
+  else if(s.nextDay||en<=st)en+=1440;
+  return en;
+}
+function pauseCredit(dur){
+  if(dur<LIMITS.pauseSegMin)return 0;
+  if(dur<LIMITS.pauseMin)return LIMITS.pauseSegMin;
+  return LIMITS.pauseMin;
+}
+function isDailyRestDur(dur){return dur>=LIMITS.restRed}
+function isNightAbs(absMin){
+  const m=((absMin%1440)+1440)%1440;
+  return m>=1260||m<360;
+}
+function getServiceType(dateStr){
+  const day=state[dateStr]||{};
+  const sel=document.getElementById('r-svctype');
+  if(dateStr===editDate&&sel&&sel.value)return sel.value;
+  return day.svctype||'occ';
+}
+function getDayRestInfo(dateStr,segs){
+  const daySegs=(segs||(state[dateStr]&&state[dateStr].segs)||[]);
+  const open=daySegs.find(s=>s.autoRestOpen);
+  if(open){
+    const startAbs=segAbsStart(dateStr,open);
+    return{open:true,startAbs,dur:0,label:'Repos en cours 日休进行中'};
+  }
+  const rests=daySegs.filter(s=>s.type==='R'&&!s.autoRestOpen&&s.start&&s.end);
+  if(!rests.length)return null;
+  let best=rests[0],bestDur=segDur(rests[0]);
+  rests.forEach(s=>{const d=segDur(s);if(d>bestDur){best=s;bestDur=d;}});
+  return{open:false,startAbs:segAbsStart(dateStr,best),endAbs:segAbsEnd(dateStr,best),dur:bestDur,label:`${fmtDate(absToDate(segAbsStart(dateStr,best)))} ${absToHHMM(segAbsStart(dateStr,best))} → ${fmtDate(absToDate(segAbsEnd(dateStr,best)))} ${absToHHMM(segAbsEnd(dateStr,best))}`};
+}
+
+// ═══════════════════════════════════════════════════════
+// CROSS-DAY HELPERS
+// ═══════════════════════════════════════════════════════
+// Get the previous day's date string
+function prevDay(dateStr){
+  const d=new Date(dateStr+'T12:00:00');
+  d.setDate(d.getDate()-1);
+  return localDateStr(d);
+}
+function nextDay(dateStr){
+  const d=new Date(dateStr+'T12:00:00');
+  d.setDate(d.getDate()+1);
+  return localDateStr(d);
+}
+
+// Build a unified chronological event list spanning today and previous day's tail
+// Returns array of {type, durMin, absMin} where absMin is absolute minutes from epoch-of-shift
+function buildAbsSegs(dateStr){
+  // Collect today's segments
+  const todaySegs=((state[dateStr]&&state[dateStr].segs)||[]).filter(s=>!s.autoRestOpen);
+  // Collect previous day's segments that spilled (nextDay=true) into today
+  const prevDate=prevDay(dateStr);
+  const prevSegs=((state[prevDate]&&state[prevDate].segs)||[]).filter(s=>!s.autoRestOpen);
+
+  // We build a timeline: each seg has absStart (minutes from a common anchor)
+  // Anchor = start of prevDate (00:00)
+  const combined=[];
+
+  prevSegs.forEach(s=>{
+    const absStart=segAbsStart(prevDate,s);
+    const absEnd=segAbsEnd(prevDate,s);
+    const startMin=absStart-daySerial(prevDate)*1440;
+    combined.push({type:s.type,startMin,dur:absEnd-absStart,fromPrev:true});
+  });
+
+  todaySegs.forEach(s=>{
+    // Today starts at 1440 offset from prevDate
+    const absStart=segAbsStart(dateStr,s);
+    const absEnd=segAbsEnd(dateStr,s);
+    const startMin=absStart-daySerial(prevDate)*1440;
+    combined.push({type:s.type,startMin,dur:absEnd-absStart,fromPrev:false});
+  });
+
+  combined.sort((a,b)=>a.startMin-b.startMin);
+  return combined;
+}
+
+// ═══════════════════════════════════════════════════════
+// ANALYSIS ENGINE — IMPROVED
+// ═══════════════════════════════════════════════════════
+
+/*
+ * Pause reset logic (Art. 7 Règl. 561/2006):
+ * - pauseAcc: accumulated pause minutes in current pause cycle
+ * - contDrive: current continuous drive minutes
+ * - When a pause segment ≥15 min is encountered: add to pauseAcc
+ * - When pauseAcc reaches 45 min: RESET both contDrive AND pauseAcc → new cycle
+ * - Pause segment <15 min → ignored (not qualifying)
+ * - Drive segment: add to contDrive; if contDrive > 270 (4h30) → violation
+ * - Rest ≥ restRed (9h): resets everything (new "day")
+ */
+function analyzeDay(segs, dateStr){
+  dateStr=dateStr||editDate;
+
+  // Build cross-day segment list
+  const combined=buildAbsSegs(dateStr);
+
+  // ─── Total counters for today only ───
+  const todaySegs=(segs||(state[dateStr]&&state[dateStr].segs)||[]).filter(s=>!s.autoRestOpen);
+  const openRest=(segs||(state[dateStr]&&state[dateStr].segs)||[]).some(s=>s.autoRestOpen);
+  let totalDrive=0,totalPause=0,totalRest=0,totalWork=0,totalAvail=0;
+  todaySegs.forEach(s=>{
+    const dur=segDur(s);
+    if(s.type==='D')totalDrive+=dur;
+    else if(s.type==='P')totalPause+=dur;
+    else if(s.type==='R')totalRest+=dur;
+    else if(s.type==='W')totalWork+=dur;
+    else if(s.type==='A')totalAvail+=dur;
+  });
+
+  // ─── Amplitude: current service period; a qualifying daily rest starts a new cycle ───
+  const todayValid=todaySegs.filter(s=>s.start&&s.end);
+  let totalAmplitude=null;
+  if(todayValid.length){
+    const ordered=todayValid.slice().sort((a,b)=>segAbsStart(dateStr,a)-segAbsStart(dateStr,b));
+    const workSegs=ordered.filter(s=>s.type!=='R');
+    if(workSegs.length){
+      const lastWorkStart=segAbsStart(dateStr,workSegs[workSegs.length-1]);
+      let cycleStartIdx=0;
+      ordered.forEach((s,i)=>{
+        if(s.type==='R'&&isDailyRestDur(segAbsEnd(dateStr,s)-segAbsStart(dateStr,s))&&segAbsEnd(dateStr,s)<=lastWorkStart){
+          cycleStartIdx=i+1;
+        }
+      });
+      const cycleSegs=ordered.slice(cycleStartIdx);
+      const firstWork=cycleSegs.find(s=>s.type!=='R');
+      if(firstWork){
+        const firstAbs=segAbsStart(dateStr,firstWork);
+        const qualifyingRest=cycleSegs.find(s=>s.type==='R'&&segAbsStart(dateStr,s)>firstAbs&&isDailyRestDur(segAbsEnd(dateStr,s)-segAbsStart(dateStr,s)));
+        const lastAbs=qualifyingRest?segAbsStart(dateStr,qualifyingRest):Math.max(...cycleSegs.map(s=>segAbsEnd(dateStr,s)));
+        totalAmplitude=Math.max(0,lastAbs-firstAbs);
+      }
+    }
+  }
+
+  // ─── Continuous drive + pause reset analysis (across days) ───
+  let contDrive=0;   // current continuous drive since last qualifying pause
+  let pauseAcc=0;    // displayed tachograph-style pause credit in current cycle
+  let pauseActualAcc=0; // actual qualifying pause minutes used for reset detection
+  let pauseCycleSegs=0; // how many pause segs in this cycle (occasional passenger: max 3)
+  let maxCont=0;
+  let maxNightCont=0;
+  let violations=[];
+  let nightViolation=false;
+  let driveCycleStartAbs=null;
+  let nightCycleActive=false;
+  let pauseInsuffWarnings=0;
+  let pauseParts=[];
+
+  // We only analyze from the last qualifying rest before today
+  // Find the last rest ≥ restRed in combined that is entirely before today (startMin < 1440)
+  let startIdx=0;
+  for(let i=combined.length-1;i>=0;i--){
+    if(combined[i].fromPrev&&combined[i].type==='R'&&combined[i].dur>=LIMITS.restRed){
+      startIdx=i+1;break;
+    }
+  }
+
+  for(let i=startIdx;i<combined.length;i++){
+    const s=combined[i];
+    if(s.type==='D'){
+      const absStart=daySerial(prevDay(dateStr))*1440+s.startMin;
+      if(contDrive===0)driveCycleStartAbs=absStart;
+      contDrive+=s.dur;
+      if(contDrive>maxCont)maxCont=contDrive;
+      const nightCycle=driveCycleStartAbs!==null&&isNightAbs(driveCycleStartAbs);
+      nightCycleActive=nightCycle;
+      if(nightCycle&&contDrive>maxNightCont)maxNightCont=contDrive;
+      if(nightCycle&&contDrive>LIMITS.driveContNight&&!nightViolation){
+        violations.push({t:'err',m:`Conduite continue de nuit ${minHM(contDrive)} dépasse 4h 夜间连续驾驶超过 4h`});
+        nightViolation=true;
+      }
+      if(contDrive>LIMITS.driveCont){
+        violations.push({t:'err',m:`Conduite continue ${minHM(contDrive)} dépasse 4h30 连续驾驶超过 4h30`});
+      }
+    } else if(s.type==='P'){
+      if(s.dur<LIMITS.pauseSegMin){
+        // Doesn't qualify
+        pauseInsuffWarnings++;
+      } else {
+        pauseCycleSegs++;
+        pauseParts.push(s.dur);
+        pauseAcc+=pauseCredit(s.dur);
+        pauseActualAcc+=s.dur;
+        const tachySplitOk=pauseParts.length>=2&&pauseParts[0]>=15&&pauseParts[pauseParts.length-1]>=30;
+        if(pauseParts.length>=2&&pauseParts[pauseParts.length-1]<30&&pauseActualAcc>=LIMITS.pauseMin){
+          violations.push({t:'warn',m:`Pause tachy : format 15+30 ou 45 min requis 记录仪逻辑需要15+30或45分钟`});
+        }
+        if(s.dur>=LIMITS.pauseMin||tachySplitOk){
+          // RESET both counters
+          contDrive=0;
+          driveCycleStartAbs=null;
+          pauseAcc=0;
+          pauseActualAcc=0;
+          pauseCycleSegs=0;
+          pauseParts=[];
+          nightViolation=false;
+          nightCycleActive=false;
+        }
+      }
+    } else if(s.type==='R'){
+      if(s.dur>=LIMITS.restRed){
+        // Qualifying rest → full reset
+        contDrive=0;driveCycleStartAbs=null;pauseAcc=0;pauseActualAcc=0;pauseCycleSegs=0;pauseParts=[];nightViolation=false;nightCycleActive=false;
+      }
+      // else: insufficient rest, contDrive continues
+    }
+    // W and A don't affect drive counter but don't reset it either
+  }
+
+  // ─── Rest type analysis for today ───
+  // Find today's rest segments and classify them
+  let restType='none'; // 'none','norm','split','short','insuf'
+  let restDetail='';
+  const restSegs=todaySegs.filter(s=>s.type==='R');
+  const totalRestToday=restSegs.reduce((a,s)=>a+segDur(s),0);
+
+  if(openRest){
+    restType='none';restDetail='Repos en cours 日休进行中';
+  } else if(restSegs.length===0){
+    restType='none';
+  } else if(restSegs.length===1){
+    const r=segDur(restSegs[0]);
+    if(r>=LIMITS.restNorm){restType='norm';restDetail=`${minHM(r)} 正常连续日休`;}
+    else if(r>=LIMITS.restRed){restType='short';restDetail=`${minHM(r)} 缩短日休 ≥9h`;}
+    else{restType='insuf';restDetail=`${minHM(r)} 不足 9h — 违规`;}
+  } else if(restSegs.length===2){
+    // Check split: first ≥3h, second ≥9h, total ≥12h
+    const r1=segDur(restSegs[0]),r2=segDur(restSegs[1]);
+    if(r1>=LIMITS.restSplit1&&r2>=LIMITS.restSplit2){
+      restType='split';restDetail=`${minHM(r1)}+${minHM(r2)} 拆分日休 (3h+9h)`;
+    } else if(r2>=LIMITS.restNorm){
+      // Maybe first part is just a nap that doesn't count
+      restType='norm';restDetail=`${minHM(r2)} 正常日休`;
+    } else if(r1>=LIMITS.restRed||r2>=LIMITS.restRed){
+      restType='short';restDetail=`${minHM(Math.max(r1,r2))} 缩短日休`;
+    } else{
+      restType='insuf';restDetail=`最大段 ${minHM(Math.max(r1,r2))} 不足 9h — 违规`;
+    }
+  } else {
+    // Multiple rest segments — find the longest qualifying one
+    const maxR=Math.max(...restSegs.map(s=>segDur(s)));
+    if(maxR>=LIMITS.restNorm){restType='norm';restDetail=`${minHM(maxR)} 正常日休`;}
+    else if(maxR>=LIMITS.restRed){restType='short';restDetail=`${minHM(maxR)} 缩短日休`;}
+    else{restType='insuf';restDetail=`最大段 ${minHM(maxR)} 不足 9h — 违规`;}
+  }
+
+  // ─── Count reduced rests between weekly rests (looking back at history) ───
+  let reducedRestCount=countReducedRestsSinceLastWeeklyRest(dateStr);
+
+  // ─── Build issues list ───
+  const issues=[...violations];
+
+  if(pauseInsuffWarnings>0){
+    issues.push({t:'warn',m:`${pauseInsuffWarnings} pause(s) <15 min — non comptabilisée(s) ${pauseInsuffWarnings} 次不足 15min 的暂停不计入`});
+  }
+
+  // Drive total
+  if(totalDrive>LIMITS.driveDayExt)
+    issues.push({t:'err',m:`Conduite ${minHM(totalDrive)} dépasse 10h 驾驶时间超过 10h 上限`});
+  else if(totalDrive>LIMITS.driveDay)
+    issues.push({t:'warn',m:`Conduite ${minHM(totalDrive)} — extension 10h utilisée 已使用 10h 延长`});
+  else if(totalDrive>0)
+    issues.push({t:'ok',m:`Conduite ${minHM(totalDrive)} — conforme 驾驶合规`});
+
+  // Pause summary
+  if(totalDrive>0){
+    const pendingPause=pauseAcc;
+    const pendingDrive=contDrive;
+    if(pendingDrive>0&&pendingPause>0&&pendingPause<45){
+      issues.push({t:'warn',m:`Pause en cours : ${pendingPause} min / 45 min requises 正在累计暂停：已有 ${pendingPause} min，需满 45 min`});
+    }
+    if(pendingDrive>180&&pendingPause===0){
+      issues.push({t:'warn',m:`Conduite continue en cours : ${minHM(pendingDrive)} sans pause suffisante 连续驾驶 ${minHM(pendingDrive)} 尚未满 45 min 暂停`});
+    }
+  }
+
+  // Continuous drive max
+  if(maxCont>LIMITS.driveCont&&!violations.some(v=>v.m.includes('4h30')))
+    issues.push({t:'err',m:`Continue max ${minHM(maxCont)} dépasse 4h30 连续驾驶超过 4h30`});
+  else if(maxCont>0&&!violations.some(v=>v.m.includes('4h30')))
+    issues.push({t:'ok',m:`Continue max ${minHM(maxCont)} ≤ 4h30 — conforme 连续驾驶合规`});
+
+  // Amplitude
+  if(totalAmplitude!==null){
+    const serviceType=getServiceType(dateStr);
+    const occAmp=serviceType==='occ';
+    const doubleAmp=serviceType==='double';
+    const ampLimit=doubleAmp?LIMITS.ampDouble:occAmp?LIMITS.ampExt:LIMITS.ampStd;
+    if(totalAmplitude>ampLimit)
+      issues.push({t:'err',m:`Amplitude ${minHM(totalAmplitude)} dépasse ${minHM(ampLimit)} 工作幅度超过上限`});
+    else if(doubleAmp)
+      issues.push({t:'ok',m:`Amplitude ${minHM(totalAmplitude)} / 18h double équipage 双人驾驶幅度按 18h 上限计算`});
+    else if(occAmp)
+      issues.push({t:'ok',m:`Amplitude ${minHM(totalAmplitude)} / 14h service occasionnel 包车幅度按 14h 上限计算`});
+    else if(totalAmplitude>780)
+      issues.push({t:'warn',m:`Amplitude ${minHM(totalAmplitude)} (13–14h) — arrêt ≥3h requis 须有 ≥3h 停歇`});
+    else if(totalAmplitude>LIMITS.ampStd)
+      issues.push({t:'warn',m:`Amplitude ${minHM(totalAmplitude)} (12–13h) — arrêt ≥2h30 requis 须有 ≥2h30 停歇`});
+    else
+      issues.push({t:'ok',m:`Amplitude ${minHM(totalAmplitude)} — conforme 工作幅度合规`});
+  }
+
+  // Rest
+  if(restType==='none'){
+    // no rest recorded — not necessarily an error for the current day
+  } else if(restType==='insuf'){
+    issues.push({t:'err',m:`Repos insuffisant — ${restDetail} 日休不足 9h 违规`});
+  } else if(restType==='short'){
+    const warnNum=reducedRestCount>LIMITS.restRedMax?'err':'warn';
+    issues.push({t:warnNum,m:`Repos réduit — ${restDetail} (${reducedRestCount}/${LIMITS.restRedMax} entre repos hebdo) 本轮缩短日休第 ${reducedRestCount} 次（周休间最多 ${LIMITS.restRedMax} 次）`});
+  } else if(restType==='split'){
+    issues.push({t:'ok',m:`Repos fractionné — ${restDetail} 拆分日休合规`});
+  } else if(restType==='norm'){
+    issues.push({t:'ok',m:`Repos normal — ${restDetail} 正常日休合规`});
+  }
+
+  const hasErr=issues.some(i=>i.t==='err');
+  const hasWarn=issues.some(i=>i.t==='warn')&&!hasErr;
+  const status=hasErr?'err':hasWarn?'warn':'ok';
+
+  const serviceType=getServiceType(dateStr);
+  const ampLimit=serviceType==='double'?LIMITS.ampDouble:serviceType==='occ'?LIMITS.ampExt:LIMITS.ampStd;
+  const nightActive=nightCycleActive&&contDrive>0;
+  const dayRestInfo=getDayRestInfo(dateStr,segs);
+
+  return{totalDrive,totalPause,totalRest:totalRestToday,totalWork,totalAvail,totalAmplitude,ampLimit,serviceType,maxCont,maxNightCont,nightCont:nightActive?contDrive:0,nightActive,pauseAcc,contDrive,restType,restDetail,dayRestInfo,reducedRestCount,issues,status};
+}
+
+// Count how many reduced rests have occurred since the last weekly rest
+function countReducedRestsSinceLastWeeklyRest(upToDate){
+  const dates=Object.keys(state).filter(k=>state[k]&&state[k].segs&&k<=upToDate).sort().reverse();
+  let count=0;
+  for(const k of dates){
+    const segs=(state[k].segs||[]);
+    // Check for weekly rest (≥45h = 2700 min) — simplified: rest segment ≥1440 min or sum of consecutive rests
+    const restSegs=segs.filter(s=>s.type==='R');
+    const maxRest=restSegs.reduce((mx,s)=>Math.max(mx,segDur(s)),0);
+    if(maxRest>=2700){break;} // weekly rest found — stop
+    if(maxRest>=LIMITS.restRed&&maxRest<LIMITS.restNorm){count++;}
+    if(maxRest>=LIMITS.restNorm){/* full rest, don't count */}
+  }
+  return count;
+}
+
+// ═══════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════
+let editDate=today();
+let editSegIdx=null;
+let modalType='D';
+let calViewDate=today();
+
+document.getElementById('r-date').value=today();
+updateDateDisplay();
+function updateClock(){
+  const now=new Date();
+  document.getElementById('hdr-date').textContent=now.toLocaleString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'});
+}
+updateClock();
+setInterval(updateClock,30000);
+syncFromDate();
+
+function onDateChange(){
+  editDate=normalizeDateInput(document.getElementById('r-date').value);
+  document.getElementById('r-date').value=editDate;
+  updateDateDisplay();
+  syncFromDate();
+}
+function shiftDate(delta){
+  editDate=normalizeDateInput(document.getElementById('r-date').value);
+  const d=new Date(editDate+'T12:00:00');
+  d.setDate(d.getDate()+delta);
+  editDate=localDateStr(d);
+  document.getElementById('r-date').value=editDate;
+  updateDateDisplay();
+  syncFromDate();
+}
+function updateDateDisplay(){
+  const el=document.getElementById('r-date-display');
+  if(el)el.textContent=fmtDate(editDate);
+}
+function openCalendar(){
+  calViewDate=editDate;
+  renderCalendar();
+  document.getElementById('cal-overlay').classList.add('open');
+}
+function closeCalendar(){document.getElementById('cal-overlay').classList.remove('open')}
+function calShiftMonth(delta){
+  const d=new Date(calViewDate+'T12:00:00');
+  d.setMonth(d.getMonth()+delta);
+  calViewDate=localDateStr(d);
+  renderCalendar();
+}
+function renderCalendar(){
+  const base=new Date(calViewDate+'T12:00:00');
+  const y=base.getFullYear(),m=base.getMonth();
+  document.getElementById('cal-title').textContent=base.toLocaleDateString('fr-FR',{month:'long',year:'numeric'});
+  const first=new Date(y,m,1,12);
+  const start=new Date(first);
+  const dow=(first.getDay()+6)%7;
+  start.setDate(first.getDate()-dow);
+  const dows=['一','二','三','四','五','六','日'];
+  let h=dows.map(x=>`<div class="cal-dow">${x}</div>`).join('');
+  for(let i=0;i<42;i++){
+    const d=new Date(start);
+    d.setDate(start.getDate()+i);
+    const ds=localDateStr(d);
+    const muted=d.getMonth()!==m?' muted':'';
+    const sel=ds===editDate?' sel':'';
+    const tod=ds===today()?' today':'';
+    h+=`<button class="cal-day${muted}${sel}${tod}" onclick="selectCalendarDate('${ds}')">${d.getDate()}</button>`;
+  }
+  document.getElementById('cal-grid').innerHTML=h;
+}
+function selectCalendarDate(ds){
+  editDate=ds;
+  document.getElementById('r-date').value=editDate;
+  updateDateDisplay();
+  closeCalendar();
+  syncFromDate();
+}
+
+function syncFromDate(){
+  const day=state[editDate]||{};
+  document.getElementById('r-date').value=editDate;
+  updateDateDisplay();
+  document.getElementById('r-client').value=day.client||'';
+  document.getElementById('r-route').value=day.route||'';
+  document.getElementById('r-svctype').value=day.svctype||'occ';
+  document.getElementById('r-note').value=day.note||'';
+  renderChainInfo();
+  renderSegs();
+  renderLiveAlerts();
+}
+
+// ═══════════════════════════════════════════════════════
+// CROSS-DAY CHAIN INFO
+// ═══════════════════════════════════════════════════════
+function renderChainInfo(){
+  const el=document.getElementById('chain-info');
+  if(state._pendingRest&&state._pendingRest.startAbs){
+    el.innerHTML=`<div class="chain-indicator">
+      <div class="chain-dot" style="background:var(--rest)"></div>
+      <span>Repos auto en cours depuis <b>${fmtDate(absToDate(state._pendingRest.startAbs))} ${absToHHMM(state._pendingRest.startAbs)}</b><br>
+      <span style="font-size:10px;color:var(--text3)">自动日休进行中；下次添加工作活动时自动计算休息时长</span></span>
+    </div>`;
+    return;
+  }
+  const prev=prevDay(editDate);
+  const prevDay2=state[prev];
+  if(!prevDay2||!prevDay2.segs||!prevDay2.segs.length){el.innerHTML='';return;}
+  // Check if any prev segment has nextDay flag or ends late
+  const lateSegs=prevDay2.segs.filter(s=>s.nextDay||effectiveStartNextDay(s)||(toMin(s.end||'00:00')<toMin(s.start||'00:00')));
+  if(!lateSegs.length){el.innerHTML='';return;}
+  const lastSeg=lateSegs[lateSegs.length-1];
+  const t=TYPES[lastSeg.type]||TYPES.D;
+  el.innerHTML=`<div class="chain-indicator">
+    <div class="chain-dot" style="background:${t.dot}"></div>
+    <span>Suite de la veille (${fmtDate(prev)}) — dernier seg: <b>${t.label}</b> jusqu'à <b>${lastSeg.end}</b><br>
+    <span style="font-size:10px;color:var(--text3)">前日连续 — 上一段：${t.cn} 至 ${lastSeg.end}</span></span>
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════════
+function goto(s){
+  document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  document.getElementById('screen-'+s).classList.add('active');
+  document.getElementById('tab-'+s).classList.add('active');
+  document.getElementById('main-content').scrollTop=0;
+  if(s==='check')renderCheck();
+  if(s==='2w')render2Week();
+  if(s==='history')renderHistory();
+}
+
+// ═══════════════════════════════════════════════════════
+// MODAL
+// ═══════════════════════════════════════════════════════
+function openModal(idx){
+  editSegIdx=(idx!==undefined&&idx!==null)?idx:null;
+  const segs=getSegs();
+  document.getElementById('m-startnextday').checked=false;
+  document.getElementById('m-nextday').checked=false;
+  if(editSegIdx!==null){
+    const s=segs[editSegIdx];
+    selType(s.type,document.querySelector('.tb-'+s.type));
+    document.getElementById('m-start').value=s.start;
+    document.getElementById('m-end').value=s.end;
+    document.getElementById('m-startnextday').checked=!!s.startNextDay;
+    document.getElementById('m-nextday').checked=!!s.nextDay;
+  } else {
+    selType('D',document.querySelector('.tb-D'));
+    const last=segs.length?segs[segs.length-1]:null;
+    document.getElementById('m-start').value=last?last.end:nowHHMM();
+    document.getElementById('m-end').value='';
+    const lastContinuesNext=last&&(last.nextDay||effectiveStartNextDay(last));
+    document.getElementById('m-startnextday').checked=!!(lastContinuesNext&&(toMin(last.end)||0)<720);
+  }
+  updateModalHint();
+  document.getElementById('seg-modal').classList.add('open');
+}
+function closeModal(){document.getElementById('seg-modal').classList.remove('open');editSegIdx=null;}
+function selType(t,btn){
+  if(!btn)btn=document.querySelector('.tb-'+t);
+  modalType=t;
+  document.querySelectorAll('.type-btn').forEach(b=>b.classList.remove('sel'));
+  if(btn)btn.classList.add('sel');
+  const rq=document.getElementById('rest-quick');
+  if(rq)rq.style.display=t==='R'?'block':'none';
+  updateModalHint();
+}
+function quickRest(mins){
+  const s=document.getElementById('m-start').value||nowHHMM();
+  document.getElementById('m-start').value=s;
+  const start=toMin(s)||0;
+  const endAbs=start+mins;
+  document.getElementById('m-end').value=absToHHMM(endAbs);
+  document.getElementById('m-nextday').checked=endAbs>=1440;
+  updateModalHint();
+}
+function updateModalHint(){
+  const rawStartsNext=document.getElementById('m-startnextday')&&document.getElementById('m-startnextday').checked;
+  const startVal=document.getElementById('m-start')&&document.getElementById('m-start').value;
+  const startsNext=rawStartsNext&&((toMin(startVal)||0)<720);
+  const isNext=document.getElementById('m-nextday')&&document.getElementById('m-nextday').checked;
+  const ignoredStartNext=rawStartsNext&&!startsNext?' ⚠ “次日凌晨开始”只适用于 00:00–11:59':'';
+  const crossStr=(startsNext?' ⟵ rattaché J+1 次日凌晨计入本日':'')+(isNext?' ⟶ +1 jour 结束跨到次日':' ')+ignoredStartNext;
+  let restInfo='';
+  if(state._pendingRest&&state._pendingRest.startAbs&&modalType!=='R'&&startVal){
+    const probe={type:modalType,start:startVal,end:startVal,startNextDay:startsNext};
+    const startAbs=segAbsStart(editDate,probe);
+    const restDur=startAbs-state._pendingRest.startAbs;
+    if(restDur>0)restInfo=` · Dernier repos 上次日休: ${fmtDate(absToDate(state._pendingRest.startAbs))} ${absToHHMM(state._pendingRest.startAbs)} → ${fmtDate(absToDate(startAbs))} ${absToHHMM(startAbs)} = ${minHM(restDur)}`;
+  }
+  const hints={
+    D:'🚌 Temps de conduite effectif 实际驾驶时间'+crossStr+restInfo,
+    P:'⏸ Pause ≥15 min comptabilisée, cumul ≥45 min pour reset 暂停段 ≥15min 有效，累积 45min 后重置计时'+crossStr+restInfo,
+    R:'🛏 Repos: ≥11h normal / 3h+9h fractionné / ≥9h réduit 日休 ≥11h 正常 / 3+9h 拆分 / ≥9h 缩短'+crossStr,
+    W:'⚙️ Chargement, admin, attente active 其他工作时间'+crossStr+restInfo,
+    A:'⌛ Attente passive, co-pilote non actif 待命/不活跃'+crossStr+restInfo,
+  };
+  document.getElementById('modal-hint').textContent=hints[modalType]||'';
+}
+function confirmSeg(){
+  editDate=normalizeDateInput(document.getElementById('r-date').value);
+  document.getElementById('r-date').value=editDate;
+  const s=document.getElementById('m-start').value;
+  const e=document.getElementById('m-end').value;
+  const startNextDay=document.getElementById('m-startnextday').checked;
+  const nextDay=document.getElementById('m-nextday').checked;
+  if(!s){toast('Remplir début 请填写开始时间');return}
+  if(modalType==='R'&&!e){
+    startPendingRestAt({type:'R',start:s,end:s,startNextDay,nextDay:false},editDate);
+    closeModal();
+    renderSegs();renderLiveAlerts();renderChainInfo();
+    toast('Repos auto démarré 自动日休已开始');
+    return;
+  }
+  if(!e){toast('Remplir fin 请填写结束时间');return}
+  const seg={type:modalType,start:s,end:e,startNextDay,nextDay};
+  seg.dur=segDur(seg);
+  if(!seg.dur){toast('Durée invalide 时长无效');return}
+  if(editSegIdx===null&&modalType!=='R')closePendingAutoRest(seg,editDate);
+  let segs=getSegs();
+  if(editSegIdx!==null){segs[editSegIdx]=seg;}
+  else{segs.push(seg);}
+  segs.sort((a,b)=>segAbsStart(editDate,a)-segAbsStart(editDate,b));
+  setSegs(segs);
+  save(state);
+  closeModal();
+  renderSegs();
+  renderLiveAlerts();
+  renderChainInfo();
+  toast(editSegIdx!==null?'Modifié ✓ 已修改':'Ajouté ✓ 已添加');
+}
+
+function closePendingAutoRest(nextSeg,nextDate){
+  const p=state._pendingRest;
+  if(!p||!p.startAbs)return;
+  const nextAbs=segAbsStart(nextDate,nextSeg);
+  if(nextAbs<=p.startAbs)return;
+  const startDate=absToDate(p.startAbs);
+  const startBase=daySerial(startDate)*1440;
+  const endOffsetDays=Math.floor((nextAbs-startBase)/1440);
+  const rest={type:'R',start:absToHHMM(p.startAbs),end:absToHHMM(nextAbs),nextDay:endOffsetDays>0,endOffsetDays,autoRest:true};
+  if(!state[startDate])state[startDate]={segs:[]};
+  const segs=(state[startDate].segs||[]).filter(s=>!s.autoRestOpen);
+  segs.push(rest);
+  segs.sort((a,b)=>segAbsStart(startDate,a)-segAbsStart(startDate,b));
+  state[startDate].segs=segs;
+  delete state._pendingRest;
+}
+
+function startPendingRestAt(startSeg,dateStr){
+  const startAbs=segAbsStart(dateStr,startSeg);
+  const startDate=absToDate(startAbs);
+  if(!state[startDate])state[startDate]={segs:[]};
+  const segs=(state[startDate].segs||[]).filter(s=>!s.autoRestOpen);
+  segs.push({type:'R',start:absToHHMM(startAbs),end:absToHHMM(startAbs),autoRestOpen:true,startNextDay:startDate!==dateStr});
+  segs.sort((a,b)=>segAbsStart(startDate,a)-segAbsStart(startDate,b));
+  state[startDate].segs=segs;
+  state._pendingRest={startAbs,date:startDate,hhmm:absToHHMM(startAbs),createdAt:new Date().toISOString()};
+  save(state);
+}
+
+function markDayEndAutoRest(){
+  editDate=normalizeDateInput(document.getElementById('r-date').value);
+  document.getElementById('r-date').value=editDate;
+  const segs=getSegs();
+  if(!segs.length){toast('Ajoutez une activité avant le repos 请先添加工作活动');return}
+  const last=segs.filter(s=>!s.autoRestOpen).slice().sort((a,b)=>segAbsEnd(editDate,a)-segAbsEnd(editDate,b)).pop();
+  if(!last){toast('Aucune activité de travail trouvée 未找到工作活动');return}
+  const startAbs=segAbsEnd(editDate,last);
+  if(!confirm(`Démarrer le repos auto à ${fmtDate(absToDate(startAbs))} ${absToHHMM(startAbs)} ?\\n确认从这个时间开始自动日休吗？`))return;
+  startPendingRestAt({type:'R',start:absToHHMM(startAbs),end:absToHHMM(startAbs)},absToDate(startAbs));
+  editDate=addDaysStr(editDate,1);
+  document.getElementById('r-date').value=editDate;
+  updateDateDisplay();
+  syncFromDate();
+  toast(`Repos auto depuis ${fmtDate(absToDate(startAbs))} ${absToHHMM(startAbs)} · passage au ${fmtDate(editDate)} 已切换到下一天`);
+}
+
+// ═══════════════════════════════════════════════════════
+// SEGMENTS DATA
+// ═══════════════════════════════════════════════════════
+function getSegs(){return(state[editDate]&&state[editDate].segs)||[]}
+function setSegs(s){if(!state[editDate])state[editDate]={};state[editDate].segs=s;}
+function deleteSegAt(idx){
+  if(!confirm('Supprimer ce segment? 删除此段?'))return;
+  let segs=getSegs();segs.splice(idx,1);setSegs(segs);save(state);
+  renderSegs();renderLiveAlerts();toast('Supprimé 已删除');
+}
+
+// ═══════════════════════════════════════════════════════
+// TIMELINE RENDER
+// ═══════════════════════════════════════════════════════
+function renderTimeline(segs){
+  if(!segs.length)return'';
+  const total=segs.reduce((a,s)=>a+segDur(s),0);
+  if(!total)return'';
+  const bars=segs.map(s=>`<div class="tl-seg tl-${s.type}" style="flex:${segDur(s)}" title="${TYPES[s.type].label} ${s.start}–${s.end}${s.nextDay?'(+1j)':''} (${minHM(segDur(s))})"></div>`).join('');
+  return`<div class="tl-wrap">${bars}</div>`;
+}
+
+function segmentDisplayParts(s,dateStr){
+  const absStart=segAbsStart(dateStr,s),absEnd=segAbsEnd(dateStr,s);
+  const parts=[];
+  let cur=absStart;
+  while(cur<absEnd){
+    const dayEnd=(Math.floor(cur/1440)+1)*1440;
+    const next=Math.min(dayEnd,absEnd);
+    parts.push({
+      date:absToDate(cur),
+      start:absToHHMM(cur),
+      end:next===dayEnd?'24:00':absToHHMM(next),
+      dur:next-cur,
+      next:absToDate(cur)!==dateStr
+    });
+    cur=next;
+  }
+  return parts;
+}
+
+// ═══════════════════════════════════════════════════════
+// RENDER SEGMENT LIST
+// ═══════════════════════════════════════════════════════
+function renderSegs(){
+  const segs=getSegs();
+  const tlEl=document.getElementById('tl-wrap');
+  const listEl=document.getElementById('seg-list');
+  tlEl.innerHTML=renderTimeline(segs);
+  if(!segs.length){
+    listEl.innerHTML=`<div class="empty"><div class="ico">📋</div><p>Aucune activité enregistrée<br>本日暂无活动记录<br><br>Appuyez sur <b>+ Ajouter 添加</b></p></div>`;
+    return;
+  }
+  let h='';
+  let totalByType={D:0,P:0,R:0,W:0,A:0};
+  segs.forEach(s=>totalByType[s.type]=(totalByType[s.type]||0)+segDur(s));
+
+  segs.forEach((s,i)=>{
+    const t=TYPES[s.type];
+    const dur=segDur(s);
+    // Warn if pause <15 min
+    let warnTag='';
+    if(s.type==='P'&&dur<15)warnTag=`<span style="font-size:10px;color:var(--red);margin-left:4px">⚠ &lt;15min</span>`;
+    const parts=segmentDisplayParts(s,editDate);
+    const partRows=s.autoRestOpen?`<div class="seg-row" style="display:flex;align-items:center;gap:8px">
+        <span class="seg-times">${s.start} → … <span class="seg-nextday">Repos en cours 日休进行中</span></span>
+        <span class="seg-dur">—</span>
+      </div>`:parts.map((p,idx)=>{
+      const dateTag=p.next?`<span class="seg-nextday">${fmtDate(p.date)} 次日</span>`:'';
+      return`<div class="seg-row" style="display:flex;align-items:center;gap:8px;${p.next&&idx>0?'margin-top:6px;padding-top:6px;border-top:1px solid var(--border)':''}">
+        <span class="seg-times">${p.start} → ${p.end}${dateTag}${warnTag}</span>
+        <span class="seg-dur">${minHM(p.dur)}</span>
+      </div>`;
+    }).join('');
+    h+=`<div class="seg-item">
+      <div class="seg-header">
+        <div class="seg-dot" style="background:${t.dot}"></div>
+        <span class="seg-type-label" style="color:${t.dot}">${t.label} <span style="font-size:10px;color:var(--text3)">${t.cn}</span></span>
+        <div style="flex:1;min-width:0">${partRows}</div>
+        <button class="btn-sm bsm-edit" style="margin-left:4px;padding:5px 8px" onclick="openModal(${i})">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </button>
+        <button class="btn-sm bsm-del" style="padding:5px 8px" onclick="deleteSegAt(${i})">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
+        </button>
+      </div>
+    </div>`;
+  });
+
+  // Totals footer with rest type pill
+  h+='<div class="card" style="margin-top:6px"><div class="crow" style="flex-wrap:wrap;gap:6px;padding:9px 11px">';
+  ['D','P','R','W','A'].forEach(t=>{
+    if(totalByType[t]){
+      h+=`<span style="font-size:11.5px;color:${TYPES[t].dot};font-weight:700">${TYPES[t].label}: ${minHM(totalByType[t])}</span>`;
+    }
+  });
+  h+='</div></div>';
+  listEl.innerHTML=h;
+}
+
+// ═══════════════════════════════════════════════════════
+// LIVE ALERTS
+// ═══════════════════════════════════════════════════════
+function renderLiveAlerts(){
+  const segs=getSegs();
+  const el=document.getElementById('live-alerts');
+  if(!segs.length){el.innerHTML='';updateHdrBadge(null);return}
+  const A=analyzeDay(segs,editDate);
+  updateHdrBadge(A.status);
+
+  let h='<div class="sl">Vérification temps réel <span class="sl-cn">实时合规检查</span></div>';
+  if(A.status==='err')h+=`<div class="alert a-err">${iconErr()}<span>Infraction(s) détectée(s) 发现违规</span></div>`;
+  else if(A.status==='warn')h+=`<div class="alert a-warn">${iconWarn()}<span>Points d'attention 请注意以下事项</span></div>`;
+  else h+=`<div class="alert a-ok">${iconOk()}<span>Journée conforme 今日合规</span></div>`;
+
+  h+='<div class="stat-grid">';
+  const ap=A.totalAmplitude?pct(A.totalAmplitude,A.ampLimit):0;
+  const ampSub=A.serviceType==='double'?'/ 18h double 双人':A.serviceType==='occ'?'/ 14h occasionnel 包车':'/ 12h (max 14h)';
+  h+=`<div class="stat"><div class="stat-label">Amplitude <span class="cn">幅度</span></div><div class="stat-val sv-${gCls(ap)}">${minHM(A.totalAmplitude)}</div><div class="stat-sub">${ampSub}</div></div>`;
+  h+=`<div class="stat"><div class="stat-label">Conduite jour <span class="cn">当日总驾驶</span></div><div class="stat-val sv-${gCls(pct(A.totalDrive,LIMITS.driveDay))}">${minHM(A.totalDrive)}</div><div class="stat-sub">/ 9h (max 10h)</div></div>`;
+  if(A.dayRestInfo){
+    let restVal=A.dayRestInfo.dur;
+    let restSub=A.dayRestInfo.label;
+    if(A.dayRestInfo.open){
+      const nowAbs=daySerial(editDate)*1440+(toMin(nowHHMM())||0);
+      restVal=Math.max(0,nowAbs-A.dayRestInfo.startAbs);
+      restSub=`depuis ${fmtDate(absToDate(A.dayRestInfo.startAbs))} ${absToHHMM(A.dayRestInfo.startAbs)}`;
+    }
+    const restCls=restVal>=LIMITS.restNorm?'ok':gCls(pct(restVal,LIMITS.restNorm));
+    h+=`<div class="stat"><div class="stat-label">Dernier repos <span class="cn">上次日休</span></div><div class="stat-val sv-${restCls}">${minHM(restVal)}</div><div class="stat-sub">${restSub}</div></div>`;
+  }
+
+  // Rest pill
+  const rpClass={norm:'rp-norm',split:'rp-split',short:'rp-short',insuf:'rp-err',none:'rp-split'}[A.restType]||'rp-split';
+  const rpLabel={norm:'✓ Normal 正常',split:'↕ Fractionné 拆分',short:'⚠ Réduit 缩短',insuf:'✗ Insuffisant 不足',none:'— Non saisi 未记录'}[A.restType]||'—';
+  h+=`<div class="stat"><div class="stat-label">Repos <span class="cn">日休</span></div><div class="stat-val" style="font-size:13px;margin-top:2px"><span class="rest-pill ${rpClass}">${rpLabel}</span></div><div class="stat-sub">${A.restDetail||'min 9h / norm 11h'}</div></div>`;
+  h+='</div>';
+
+  // Pause progress bar
+  if(A.totalDrive>0){
+    const pausePct=Math.min(100,Math.round((A.pauseAcc/45)*100));
+    const contPct=Math.min(100,Math.round((A.contDrive/270)*100));
+    h+=`<div class="card" style="margin-bottom:8px"><div style="padding:9px 13px">
+      <div style="font-size:10px;color:var(--text2);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Cycle pause en cours <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--text3)">当前暂停累计</span></div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:3px">
+        <span style="font-size:11px;color:var(--text2)">Pause cumulée 累计暂停</span>
+        <span style="font-size:12px;font-weight:700;color:${pausePct>=100?'var(--green)':'var(--amber)'}">${A.pauseAcc} min / 45 min</span>
+      </div>
+      <div class="gauge-track" style="margin-bottom:7px"><div class="gauge-fill ${pausePct>=100?'gf-ok':'gf-warn'}" style="width:${pausePct}%"></div></div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:3px">
+        <span style="font-size:11px;color:var(--text2)">Conduite continue depuis last pause 连续驾驶（本轮）</span>
+        <span style="font-size:12px;font-weight:700;color:${contPct>=100?'var(--red)':contPct>=70?'var(--amber)':'var(--text)'}">${minHM(A.contDrive)} / 4h30</span>
+      </div>
+      <div class="gauge-track"><div class="gauge-fill ${gfCls(contPct)}" style="width:${contPct}%"></div></div>
+    </div></div>`;
+  }
+
+  if(A.nightActive){
+    const nightPct=Math.min(100,Math.round((A.nightCont/LIMITS.driveContNight)*100));
+    h+=`<div class="card" style="margin-bottom:8px"><div style="padding:9px 13px">
+      <div style="font-size:10px;color:var(--text2);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Conduite nuit en cours <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--text3)">夜间连续驾驶</span></div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:3px">
+        <span style="font-size:11px;color:var(--text2)">Période 21h–6h 夜间时段</span>
+        <span style="font-size:12px;font-weight:700;color:${nightPct>=100?'var(--red)':nightPct>=70?'var(--amber)':'var(--text)'}">${minHM(A.nightCont)} / 4h00</span>
+      </div>
+      <div class="gauge-track"><div class="gauge-fill ${gfCls(nightPct)}" style="width:${nightPct}%"></div></div>
+    </div></div>`;
+  }
+
+  A.issues.forEach(i=>{
+    const cls=i.t==='ok'?'a-ok':i.t==='warn'?'a-warn':'a-err';
+    const icon=i.t==='ok'?iconOk():i.t==='warn'?iconWarn():iconErr();
+    h+=`<div class="alert ${cls}">${icon}<span>${i.m}</span></div>`;
+  });
+  el.innerHTML=h;
+}
+
+function updateHdrBadge(s){
+  const b=document.getElementById('hdr-badge');
+  if(!s){b.style.display='none';return}
+  b.style.display='block';
+  if(s==='ok'){b.style.background='var(--green-bg)';b.style.color='var(--green)';b.style.border='1px solid var(--green-b)';b.textContent='✓ OK';}
+  else if(s==='warn'){b.style.background='var(--amber-bg)';b.style.color='var(--amber)';b.style.border='1px solid var(--amber-b)';b.textContent='⚠ Attn.';}
+  else{b.style.background='var(--red-bg)';b.style.color='var(--red)';b.style.border='1px solid var(--red-b)';b.textContent='✗ Infr.';}
+}
+
+// ═══════════════════════════════════════════════════════
+// SAVE DAY
+// ═══════════════════════════════════════════════════════
+function saveDay(){
+  const segs=getSegs();
+  if(!segs.length){toast('Ajoutez des activités 请先添加活动');return}
+  if(!state[editDate])state[editDate]={};
+  state[editDate].client=document.getElementById('r-client').value.trim();
+  state[editDate].route=document.getElementById('r-route').value.trim();
+  state[editDate].svctype=document.getElementById('r-svctype').value;
+  state[editDate].note=document.getElementById('r-note').value.trim();
+  state[editDate].savedAt=new Date().toISOString();
+  save(state);
+  toast('Journée enregistrée ✓ 已保存');
+  goto('check');
+}
+
+// ═══════════════════════════════════════════════════════
+// RENDER CHECK
+// ═══════════════════════════════════════════════════════
+function renderCheck(){
+  const el=document.getElementById('check-content');
+  const dates=Object.keys(state).filter(k=>state[k].segs&&state[k].segs.length).sort().reverse();
+  if(!dates.length){
+    el.innerHTML='<div class="empty"><div class="ico">🛡️</div><p>Aucune journée enregistrée<br>暂无记录<br>Allez dans "今日 Auj." pour saisir</p></div>';
+    return;
+  }
+  const key=state[editDate]&&state[editDate].segs&&state[editDate].segs.length?editDate:dates[0];
+  const day=state[key];
+  const segs=day.segs||[];
+  const A=analyzeDay(segs,key);
+  let h='';
+
+  h+=`<div class="sl">Bilan opérationnel <span class="sl-cn">实用报告 — ${fmtDate(key)}</span></div>`;
+  if(day.client||day.route)h+=`<div class="alert a-info" style="margin-bottom:9px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><line x1="3" y1="12" x2="21" y2="12"/><polyline points="15 6 21 12 15 18"/></svg><span>${[day.client,day.route].filter(Boolean).join(' · ')}</span></div>`;
+
+  if(A.status==='err')h+=`<div class="alert a-err">${iconErr()}<span>Infraction(s) détectée(s) — vérifier 发现违规项</span></div>`;
+  else if(A.status==='warn')h+=`<div class="alert a-warn">${iconWarn()}<span>Points d'attention 请确认以下注意事项</span></div>`;
+  else h+=`<div class="alert a-ok">${iconOk()}<span>Journée entièrement conforme 今日全部合规 ✓</span></div>`;
+
+  h+='<div class="stat-grid">';
+  h+=`<div class="stat"><div class="stat-label">Amplitude <span class="cn">幅度</span></div><div class="stat-val sv-${gCls(A.totalAmplitude?pct(A.totalAmplitude,A.ampLimit):0)}">${minHM(A.totalAmplitude)}</div><div class="stat-sub">${A.serviceType==='double'?'max 18h double 双人':A.serviceType==='occ'?'max 14h occasionnel 包车':'max 12h (ext. 14h)'}</div></div>`;
+  h+=`<div class="stat"><div class="stat-label">Conduite jour <span class="cn">当日总驾驶</span></div><div class="stat-val sv-${gCls(pct(A.totalDrive,LIMITS.driveDay))}">${minHM(A.totalDrive)}</div><div class="stat-sub">max 9h (ext. 10h)</div></div>`;
+  h+=`<div class="stat"><div class="stat-label">Pause cycle <span class="cn">本轮暂停</span></div><div class="stat-val sv-${gCls(pct(A.pauseAcc,45))}">${A.pauseAcc}m</div><div class="stat-sub">45m reset</div></div>`;
+  h+=`<div class="stat"><div class="stat-label">Continue <span class="cn">连续驾驶</span></div><div class="stat-val sv-${gCls(pct(A.contDrive,LIMITS.driveCont))}">${minHM(A.contDrive)}</div><div class="stat-sub">max 4h30</div></div>`;
+  // Rest type
+  const rpClass={norm:'rp-norm',split:'rp-split',short:'rp-short',insuf:'rp-err',none:'rp-split'}[A.restType]||'rp-split';
+  const rpLabel={norm:'Normal 正常',split:'Fractionné 拆分',short:`Réduit ${A.reducedRestCount}/3`,insuf:'Insuffisant 不足',none:'Non saisi'}[A.restType]||'—';
+  h+=`<div class="stat"><div class="stat-label">Type repos <span class="cn">日休类型</span></div><div style="margin-top:4px"><span class="rest-pill ${rpClass}">${rpLabel}</span></div><div class="stat-sub">${A.restDetail||'—'}</div></div>`;
+  h+='</div>';
+
+  const nextMsgs=[];
+  if(A.contDrive>0)nextMsgs.push(`Conduite continue restante 连续驾驶剩余: ${minHM(Math.max(0,LIMITS.driveCont-A.contDrive))}`);
+  if(A.pauseAcc>0&&A.pauseAcc<45)nextMsgs.push(`Pause à compléter 还需暂停: ${45-A.pauseAcc} min`);
+  if(A.totalDrive>0)nextMsgs.push(`Conduite journalière restante 今日驾驶剩余: ${minHM(Math.max(0,LIMITS.driveDayExt-A.totalDrive))}`);
+  if(A.totalAmplitude!==null)nextMsgs.push(`Amplitude restante 幅度剩余: ${minHM(Math.max(0,A.ampLimit-A.totalAmplitude))}`);
+  h+=`<div class="sl">À surveiller <span class="sl-cn">下一步关注</span></div>`;
+  h+=`<div class="card">${(nextMsgs.length?nextMsgs:['Aucun point immédiat 当前无紧急事项']).map(m=>`<div class="crow"><span style="font-size:12.5px;color:var(--text2)">${m}</span></div>`).join('')}</div>`;
+
+  h+=`<div class="sl">Détail conformité <span class="sl-cn">合规详情</span></div>`;
+  A.issues.forEach(i=>{
+    const cls=i.t==='ok'?'a-ok':i.t==='warn'?'a-warn':'a-err';
+    const icon=i.t==='ok'?iconOk():i.t==='warn'?iconWarn():iconErr();
+    h+=`<div class="alert ${cls}">${icon}<span>${i.m}</span></div>`;
+  });
+
+  h+=`<div class="sl">Détail segments <span class="sl-cn">活动明细</span></div>`;
+  h+='<div class="card">';
+  segs.forEach(s=>{
+    const t=TYPES[s.type];
+    segmentDisplayParts(s,key).forEach((p,idx)=>{
+      const dateTag=p.next?` <span class="seg-nextday">${fmtDate(p.date)} 次日</span>`:'';
+      h+=`<div class="crow" style="gap:10px;${idx?'padding-left:36px':''}"><div style="width:9px;height:9px;border-radius:50%;background:${idx?'var(--border2)':t.dot};flex-shrink:0"></div><span style="font-size:12px;color:${t.dot};font-weight:700;min-width:65px">${idx?'Suite':t.label}</span><span style="font-size:12.5px;color:var(--text2)">${p.start}–${p.end}${dateTag}</span><span style="margin-left:auto;font-size:12.5px;font-weight:700;color:var(--text)">${minHM(p.dur)}</span></div>`;
+    });
+  });
+  h+='</div>';
+  el.innerHTML=h;
+}
+
+// ═══════════════════════════════════════════════════════
+// 2-WEEK VIEW
+// ═══════════════════════════════════════════════════════
+function getWindowData(daysCount=14,forward=false){
+  const now=new Date(today()+'T12:00:00'),days=[];
+  if(forward){
+    for(let i=0;i<daysCount;i++){const d=new Date(now);d.setDate(now.getDate()+i);days.push(localDateStr(d));}
+  }else{
+    for(let i=daysCount-1;i>=0;i--){const d=new Date(now);d.setDate(now.getDate()-i);days.push(localDateStr(d));}
+  }
+  return days;
+}
+function getCenteredWindowData(radius=15){
+  const now=new Date(today()+'T12:00:00'),days=[];
+  for(let i=-radius;i<=radius;i++){
+    const d=new Date(now);
+    d.setDate(now.getDate()+i);
+    days.push(localDateStr(d));
+  }
+  return days;
+}
+function get2WeekData(){return getWindowData(14)}
+function get30DayData(){return getCenteredWindowData(15)}
+function get15DayData(){return getWindowData(15,true)}
+function getWeekDates(offset=0){
+  const now=new Date(today()+'T12:00:00');const dow=now.getDay()||7;const mon=new Date(now);
+  mon.setDate(now.getDate()-dow+1+offset*7);
+  const dates=[];for(let i=0;i<7;i++){const d=new Date(mon);d.setDate(mon.getDate()+i);dates.push(localDateStr(d));}return dates;
+}
+function sumDrive(dates){let t=0;dates.forEach(k=>{if(state[k]&&state[k].segs)(state[k].segs||[]).forEach(s=>{if(s.type==='D')t+=segDur(s);});});return t;}
+function sumWork(dates){let t=0;dates.forEach(k=>{if(state[k]&&state[k].segs)(state[k].segs||[]).forEach(s=>{if(s.type!=='R'&&s.type!=='A')t+=segDur(s);});});return t;}
+function weekUsage(dates){
+  let drive10=0,reduced=0;
+  dates.forEach(k=>{
+    const day=state[k];
+    if(!day||!day.segs||!day.segs.length)return;
+    const A=analyzeDay(day.segs,k);
+    if(A.totalDrive>LIMITS.driveDay&&A.totalDrive<=LIMITS.driveDayExt)drive10++;
+    if(A.restType==='short')reduced++;
+  });
+  return{drive10,reduced};
+}
+function maxRestOnDate(k){
+  const segs=(state[k]&&state[k].segs)||[];
+  return segs.filter(s=>s.type==='R').reduce((mx,s)=>Math.max(mx,segDur(s)),0);
+}
+function hasWorkOnDate(k){
+  const segs=(state[k]&&state[k].segs)||[];
+  return segs.some(s=>s.type!=='R');
+}
+function longestRestInWindow(dates){
+  let max=0;
+  dates.forEach(k=>{max=Math.max(max,maxRestOnDate(k));});
+  return max;
+}
+function issueShortLabel(issue){
+  const m=issue&&issue.m?issue.m:'';
+  if(m.includes('Amplitude'))return'Amplitude 幅度';
+  if(m.includes('Conduite continue')||m.includes('Continue max'))return'Continue 连续驾驶';
+  if(m.includes('Conduite'))return'Conduite 驾驶';
+  if(m.includes('Pause'))return'Pause 暂停';
+  if(m.includes('Repos'))return'Repos 日休';
+  return'À vérifier 检查';
+}
+function restTargetInfo(){
+  let key=state._cycleRestTarget||(state._special12?'90':'45');
+  if(!state._special12&&(key==='90'||key==='69'))key='45';
+  const map={
+    '45':{key:'45',minutes:2700,label:'45h normal 正常周休',maxDays:6},
+    '24':{key:'24',minutes:1440,label:'24h réduit 缩减周休',maxDays:6},
+    '90':{key:'90',minutes:5400,label:'90h spécial 正常恢复',maxDays:12},
+    '69':{key:'69',minutes:4140,label:'69h minimum 最低恢复',maxDays:12}
+  };
+  return map[key]||map['45'];
+}
+function allTimelineEvents(){
+  const nowAbs=daySerial(today())*1440+(toMin(nowHHMM())||0);
+  const events=[];
+  Object.keys(state).filter(k=>/^\d{4}-\d{2}-\d{2}$/.test(k)&&state[k]&&state[k].segs).forEach(k=>{
+    (state[k].segs||[]).forEach(s=>{
+      const start=segAbsStart(k,s);
+      const end=s.autoRestOpen?Math.max(start,nowAbs):segAbsEnd(k,s);
+      events.push({date:k,type:s.type,start,end,dur:Math.max(0,end-start),seg:s});
+    });
+  });
+  return events.sort((a,b)=>a.start-b.start||a.end-b.end);
+}
+function currentCycleRest(){
+  const events=allTimelineEvents();
+  let lastWorkEnd=null;
+  events.forEach(e=>{if(e.type!=='R')lastWorkEnd=lastWorkEnd===null?e.end:Math.max(lastWorkEnd,e.end);});
+  if(lastWorkEnd===null)return{dur:0,label:'Aucun travail 工作未开始'};
+  let best=null;
+  events.forEach(e=>{
+    if(e.type!=='R'||e.end<=lastWorkEnd)return;
+    const dur=e.end-Math.max(e.start,lastWorkEnd);
+    if(!best||dur>best.dur)best={dur,start:e.start,end:e.end,open:!!e.seg.autoRestOpen};
+  });
+  if(!best)return{dur:0,label:'Repos non commencé 本周期休息未开始'};
+  return{dur:best.dur,label:`${fmtDate(absToDate(best.start))} ${absToHHMM(best.start)} → ${best.open?'...':fmtDate(absToDate(best.end))+' '+absToHHMM(best.end)}`};
+}
+function latestRestBlock(){
+  const rests=allTimelineEvents().filter(e=>e.type==='R'&&e.dur>0);
+  if(!rests.length)return{dur:0,label:'Aucun repos 休息未开始'};
+  const r=rests[rests.length-1];
+  return{dur:r.dur,label:`${fmtDate(absToDate(r.start))} ${absToHHMM(r.start)} → ${r.seg.autoRestOpen?'...':fmtDate(absToDate(r.end))+' '+absToHHMM(r.end)}`};
+}
+function compensationItems(){
+  if(!Array.isArray(state._compensations))state._compensations=[];
+  return state._compensations;
+}
+function compensationLabel(type){
+  return type==='69'?'69h spécial: +21h':'24h réduit: +21h';
+}
+function getWorkCycleCounters(){
+  const normalDates=new Set(),specialDates=new Set();
+  let specialReady=false;
+  allTimelineEvents().forEach(e=>{
+    if(e.type==='R'){
+      if(e.dur>=1440){
+        normalDates.clear();
+      }
+      if(state._special12&&e.dur>=4140){
+        specialReady=false;
+        specialDates.clear();
+      }else if(state._special12&&e.dur>=2700){
+        specialReady=true;
+        specialDates.clear();
+      }
+      return;
+    }
+    normalDates.add(e.date);
+    if(state._special12&&specialReady)specialDates.add(e.date);
+  });
+  return{normal6:normalDates.size,special12:state._special12?specialDates.size:0};
+}
+
+function render2Week(){
+  const el=document.getElementById('twoweek-content');
+  const w0=getWeekDates(-1),w1=getWeekDates(0),all2=get2WeekData();
+  const d0=sumDrive(w0),d1=sumDrive(w1),dTotal=sumDrive(all2);
+  const wk0=sumWork(w0),wk1=sumWork(w1);
+  const u0=weekUsage(w0),u1=weekUsage(w1);
+  const p2=pct(dTotal,LIMITS.biweekDrive);
+  const p0=pct(d0,LIMITS.weekDrive),p1=pct(d1,LIMITS.weekDrive);
+  const pw0=pct(wk0,LIMITS.weekWork),pw1=pct(wk1,LIMITS.weekWork);
+
+  // Count reduced rests in the 2-week window
+  let reducedTotal=0;
+  all2.forEach(k=>{
+    const segs=(state[k]&&state[k].segs)||[];
+    const maxR=segs.filter(s=>s.type==='R').reduce((mx,s)=>Math.max(mx,segDur(s)),0);
+    if(maxR>=LIMITS.restRed&&maxR<LIMITS.restNorm)reducedTotal++;
+  });
+
+  const cycles=getWorkCycleCounters();
+
+  let h='';
+  h+=`<div class="sl">Compteur 2 semaines <span class="sl-cn">两周驾驶计数器</span></div>`;
+  const remain=Math.max(0,LIMITS.biweekDrive-dTotal);
+  h+=`<div class="week2-box">
+    <div class="week2-title">14 jours glissants <span class="cn">近 14 天滚动统计</span></div>
+    <div style="display:flex;align-items:flex-end;gap:10px;margin-bottom:8px">
+      <div style="flex:1">
+        <div style="font-size:32px;font-weight:700;color:${p2>=100?'var(--red)':p2>=85?'var(--amber)':'var(--green)'};line-height:1">${minHM(dTotal)}</div>
+        <div style="font-size:12px;color:var(--text2);margin-top:3px">/ 90h00 max &nbsp;|&nbsp; Reste 剩余: <b style="color:${p2>=85?'var(--amber)':'var(--green)'}">${minHM(remain)}</b></div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:11px;color:var(--text3)">Utilisation</div>
+        <div style="font-size:20px;font-weight:700;color:${p2>=100?'var(--red)':p2>=85?'var(--amber)':'var(--text)'}">${p2}%</div>
+      </div>
+    </div>
+    <div class="gauge-track" style="height:8px;border-radius:4px"><div class="gauge-fill ${gfCls(p2)}" style="width:${p2}%;height:100%"></div></div>
+    ${p2>=100?'<div class="alert a-err" style="margin-top:8px;margin-bottom:0">'+iconErr()+'<span>Limite 90h dépassée! 两周驾驶已超过 90h 上限！</span></div>':p2>=85?'<div class="alert a-warn" style="margin-top:8px;margin-bottom:0">'+iconWarn()+'<span>Approche de la limite 接近 90h 上限</span></div>':''}
+  </div>`;
+
+  h+=`<div class="sl">Semaines <span class="sl-cn">各周明细</span></div>`;
+  h+='<div class="card">';
+  function weekRow(label,cn,drive,work,dp,wp,dates,usage){
+    const dayCount=dates.filter(k=>state[k]&&state[k].segs&&state[k].segs.length).length;
+    const d10p=pct(usage.drive10,2),rrp=pct(usage.reduced,3);
+    return`<div style="padding:10px 13px;border-bottom:1px solid var(--border)">
+      <div style="display:flex;justify-content:space-between;margin-bottom:7px">
+        <span style="font-size:12.5px;font-weight:700;color:var(--text)">${label} <span style="font-size:11px;color:var(--text2)">${cn}</span></span>
+        <span style="font-size:11.5px;color:var(--text2)">${dayCount} jour(s)</span>
+      </div>
+      <div style="margin-bottom:5px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:3px">
+          <span style="font-size:11px;color:var(--text2)">Conduite 驾驶</span>
+          <span class="gauge-val sv-${gCls(dp)}" style="font-size:12px">${minHM(drive)} / 56h</span>
+        </div>
+        <div class="gauge-track"><div class="gauge-fill ${gfCls(dp)}" style="width:${dp}%"></div></div>
+      </div>
+      <div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:3px">
+          <span style="font-size:11px;color:var(--text2)">Travail 工作</span>
+          <span class="gauge-val sv-${gCls(wp)}" style="font-size:12px">${minHM(work)} / 48h</span>
+        </div>
+        <div class="gauge-track"><div class="gauge-fill ${gfCls(wp)}" style="width:${wp}%"></div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:9px">
+        <div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:3px">
+            <span style="font-size:11px;color:var(--text2)">10h conduite</span>
+            <span class="gauge-val sv-${usage.drive10>2?'err':usage.drive10===2?'warn':'ok'}" style="font-size:12px">${usage.drive10} / 2</span>
+          </div>
+          <div class="gauge-track"><div class="gauge-fill ${usage.drive10>2?'gf-err':usage.drive10===2?'gf-warn':'gf-ok'}" style="width:${d10p}%"></div></div>
+        </div>
+        <div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:3px">
+            <span style="font-size:11px;color:var(--text2)">Repos réduit 9h</span>
+            <span class="gauge-val sv-${usage.reduced>3?'err':usage.reduced===3?'warn':'ok'}" style="font-size:12px">${usage.reduced} / 3</span>
+          </div>
+          <div class="gauge-track"><div class="gauge-fill ${usage.reduced>3?'gf-err':usage.reduced===3?'gf-warn':'gf-ok'}" style="width:${rrp}%"></div></div>
+        </div>
+      </div>
+    </div>`;
+  }
+  h+=weekRow('Semaine précédente','上周',d0,wk0,p0,pw0,w0,u0);
+  h+=weekRow('Semaine en cours','本周',d1,wk1,p1,pw1,w1,u1);
+  h+='</div>';
+
+  h+=`<div class="sl">Jours consécutifs <span class="sl-cn">连续工作天数</span></div>`;
+  const target=restTargetInfo();
+  const cycleRest=currentCycleRest();
+  const displayRest=cycleRest.dur>0?cycleRest:latestRestBlock();
+  h+=`<div class="week2-box">
+    <div style="font-size:12.5px;font-weight:700;color:var(--text);margin-bottom:7px">Repos de cycle à valider <span style="font-size:11px;color:var(--text2)">选择本次周期休息目标</span></div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px">
+      ${['45','24','90','69'].map(k=>{
+        const info={45:'45h',24:'24h',90:'90h',69:'69h'}[k];
+        const blocked=(k==='90'||k==='69')&&!state._special12;
+        return`<button class="btn-sm ${target.key===k?'bsm-add':'bsm-edit'}" ${blocked?'disabled':''} onclick="setCycleRestTarget('${k}')" style="justify-content:center;padding:7px 4px;${blocked?'opacity:.45;cursor:not-allowed':''}">${info}</button>`;
+      }).join('')}
+    </div>
+    <div style="font-size:10.5px;color:var(--text3);margin-top:7px">Actuel: ${target.label}. Ces boutons changent seulement le repos à contrôler; ils ne changent pas le calcul des jours. Normal 6 jours redémarre après repos hebdo normal 45h; 90h/69h sont disponibles seulement après activation du cycle spécial 12 jours. 按钮只切换验收目标，不改变连续天数计算。</div>
+  </div>`;
+  function restProgress(label,limit,key,okText){
+    const p=pct(displayRest.dur,limit);
+    const done=displayRest.dur>=limit;
+    const cls=done?'gf-ok':target.key===key?'gf-warn':'gf-drive';
+    return`<div style="margin-top:9px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:3px">
+        <span style="font-size:11px;color:var(--text2)">${label}</span>
+        <span style="font-size:12px;font-weight:700;color:${done?'var(--green)':target.key===key?'var(--amber)':'var(--text2)'}">${minHM(displayRest.dur)} / ${minHM(limit)}</span>
+      </div>
+      <div class="gauge-track"><div class="gauge-fill ${cls}" style="width:${p}%"></div></div>
+      ${done?`<div style="font-size:10px;color:var(--green);margin-top:4px">${okText}</div>`:''}
+    </div>`;
+  }
+  function cycleBox(title,cn,count,max,resetTxt,errTxt){
+    const cp=pct(count,max);
+    const col=gCls(cp)==='ok'?'var(--green)':gCls(cp)==='warn'?'var(--amber)':'var(--red)';
+    return`<div class="week2-box">
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:8px">
+        <div><div style="font-size:28px;font-weight:700;color:${col}">${count} <span style="font-size:13px;font-weight:400;color:var(--text2)">/ ${max} jours 天</span></div>
+        <div style="font-size:11px;color:var(--text2);margin-top:2px">${title} ${cn}</div></div>
+        <div style="text-align:right"><div style="font-size:18px;font-weight:700;color:${col}">${cp}%</div></div>
+      </div>
+      <div class="gauge-track" style="height:6px;border-radius:3px"><div class="gauge-fill ${gfCls(cp)}" style="width:${cp}%"></div></div>
+      <div style="font-size:10.5px;color:var(--text3);margin-top:7px">${resetTxt}</div>
+      ${count>max?'<div class="alert a-err" style="margin-top:8px;margin-bottom:0">'+iconErr()+`<span>${errTxt}</span></div>`:''}
+    </div>`;
+  }
+  h+=cycleBox('Cycle normal','正常 6 天周期',cycles.normal6,6,`连续天数不受上面按钮影响；本栏按 45h 正常周休重新开始计算。当前/最近休息：${minHM(displayRest.dur)} (${displayRest.label})。`,'Plus de 6 jours sans repos hebdo 超过 6 天未周休');
+  h+=`<div class="week2-box">${restProgress('Repos hebdo normal 45h 正常周休',2700,'45','45h atteint 可清零正常周期')}${restProgress('Repos hebdo réduit 24h 缩减周休',1440,'24','24h atteint 可作为缩减周休')}</div>`;
+  h+=`<div class="week2-box"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+    <div><div style="font-size:12.5px;font-weight:700;color:var(--text)">Cycle spécial 12 jours <span style="font-size:11px;color:var(--text2)">特殊行程</span></div>
+    <div style="font-size:10.5px;color:var(--text3);margin-top:2px">默认关闭；只有确认为旅游包车特殊行程时启用。</div></div>
+    <button class="btn-sm ${state._special12?'bsm-del':'bsm-add'}" onclick="toggleSpecial12()" style="flex-shrink:0">${state._special12?'Désactiver 关闭':'Activer 启用'}</button>
+  </div></div>`;
+  if(state._special12){
+    h+=cycleBox('Cycle spécial 12 jours','特殊行程 12 天周期',cycles.special12,12,`特殊周期已启用；本栏按 69h/90h 恢复休息重新开始计算。当前/最近休息：${minHM(displayRest.dur)} (${displayRest.label})。`,'Plus de 12 jours en service spécial 超过 12 天特殊行程');
+    h+=`<div class="week2-box">${restProgress('Repos spécial 90h 正常恢复',5400,'90','90h atteint 可清零12天周期')}${restProgress('Repos spécial minimum 69h 最低恢复',4140,'69','69h atteint 最低恢复达成')}</div>`;
+  }
+
+  const comps=compensationItems();
+  const openComps=comps.filter(c=>!c.paid);
+  h+=`<div class="sl">Compensation repos réduit <span class="sl-cn">缩减周休补休</span></div>`;
+  h+=`<div class="week2-box">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:8px">
+      <button class="btn-sm bsm-edit" onclick="addCompensation('24')" style="justify-content:center">+ Dette 24h 欠21h</button>
+      <button class="btn-sm bsm-edit" onclick="addCompensation('69')" style="justify-content:center">+ Dette 69h 欠21h</button>
+    </div>
+    <div style="font-size:10.5px;color:var(--text3);margin-bottom:${openComps.length?'8px':'0'}">缩减周休需要补回差额：24h 周休欠 21h；12 天后 69h 恢复也欠 21h。补休必须在 3 周内完成，并连接到另一个休息时间。</div>
+    ${openComps.length?openComps.map(c=>`<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:7px 0;border-top:1px solid var(--border)">
+      <div style="min-width:0"><div style="font-size:12px;font-weight:700;color:${c.due<today()?'var(--red)':'var(--amber)'}">${compensationLabel(c.type)}</div>
+      <div style="font-size:10.5px;color:var(--text3)">Créée ${fmtDate(c.date)} · limite ${fmtDate(c.due)} · reste ${minHM(c.owed||1260)}</div></div>
+      <button class="btn-sm bsm-add" onclick="markCompensation('${c.id}')" style="flex-shrink:0">Compensé 已补</button>
+    </div>`).join(''):'<div style="font-size:11px;color:var(--green);font-weight:700">Aucune dette ouverte 暂无未补休记录</div>'}
+  </div>`;
+
+  h+=`<div class="sl">Tableau 30 jours <span class="sl-cn">今日前后 15 天</span></div>`;
+  h+='<div class="card"><table class="sum-table">';
+  h+='<tr><th>Date 日期</th><th>Conduite 驾驶</th><th>Repos 日休</th><th>Statut 状态</th></tr>';
+  get30DayData().forEach(k=>{
+    const day=state[k];
+    if(!day||!day.segs||!day.segs.length){
+      h+=`<tr><td style="color:var(--text3)">${fmtDate(k)}</td><td style="color:var(--text3)">—</td><td style="color:var(--text3)">—</td><td style="color:var(--text3)">—</td></tr>`;
+      return;
+    }
+    const A=analyzeDay(day.segs,k);
+    const sc=A.status==='ok'?'ok':A.status==='warn'?'warn':'err';
+    const main=A.issues.find(i=>i.t==='err'||i.t==='warn');
+    const st=A.status==='ok'?'OK 合规':`${A.status==='warn'?'Attention 注意':'Infraction 违规'}<br><span style="font-size:10px;font-weight:500;color:inherit">${issueShortLabel(main)}</span>`;
+    const detail=main?` title="${esc(main.m)}"`:'';
+    const rpL={norm:'Normal',split:'3h+9h',short:`Réduit ${A.reducedRestCount}`,insuf:'Insuff.',none:'—'}[A.restType]||'—';
+    const rpC={norm:'ok',split:'',short:'warn',insuf:'err',none:''}[A.restType]||'';
+    const restDur=A.dayRestInfo?A.dayRestInfo.dur:A.totalRest;
+    const restTxt=restDur?`${minHM(restDur)}<br><span style="font-size:10px;font-weight:500;color:inherit">${rpL}</span>`:rpL;
+    h+=`<tr><td>${fmtDate(k)}</td><td class="${gCls(pct(A.totalDrive,LIMITS.driveDay))}">${minHM(A.totalDrive)}</td><td class="${rpC}">${restTxt}</td><td class="${sc}"${detail}>${st}</td></tr>`;
+  });
+  h+='<tr><td colspan="4" style="font-size:10px;color:var(--text3);padding:6px 10px">Fenêtre centrée: J-15 → aujourd’hui → J+15. Repos: Normal · 3h+9h · Réduit · Insuff.</td></tr>';
+  h+='</table></div>';
+
+  // Driver card reminder
+  const lastDlKeys=Object.keys(state).filter(k=>state[k].cardDownload).sort().reverse();
+  const lastDl=lastDlKeys.length?state[lastDlKeys[0]].cardDownload:null;
+  let daysSinceDl=null;
+  if(lastDl){daysSinceDl=Math.floor((Date.now()-new Date(lastDl))/(86400000));}
+  h+=`<div class="sl">Carte conducteur <span class="sl-cn">司机卡提醒</span></div>`;
+  h+=`<div class="card-reminder">
+    <div class="card-reminder-icon">💳</div>
+    <div class="card-reminder-text">
+      <div class="card-reminder-title">Téléchargement carte 司机卡下载</div>
+      <div class="card-reminder-sub">${lastDl?`Dernier : ${fmtDate(lastDl)} (${daysSinceDl}j) ${daysSinceDl>=28?'— ⚠ À faire maintenant 需要下载':'— OK'}`:' Pas de date enregistrée 尚未记录下载日期'}</div>
+    </div>
+    <button class="btn-sm bsm-add" onclick="markCardDownload()" style="flex-shrink:0">Fait 已完成</button>
+  </div>`;
+  el.innerHTML=h;
+}
+
+function markCardDownload(){
+  const tk=today();
+  if(!state[tk])state[tk]={};
+  state[tk].cardDownload=tk;
+  save(state);render2Week();toast('Téléchargement enregistré ✓ 已记录下载日期');
+}
+function toggleSpecial12(){
+  state._special12=!state._special12;
+  const current=restTargetInfo().key;
+  if(state._special12&&(current==='45'||current==='24'))state._cycleRestTarget='90';
+  if(!state._special12&&(current==='90'||current==='69'))state._cycleRestTarget='45';
+  save(state);
+  render2Week();
+  toast(state._special12?'Cycle spécial 12 jours activé 已启用12天特殊行程':'Cycle spécial désactivé 已关闭12天特殊行程');
+}
+function setCycleRestTarget(key){
+  if((key==='90'||key==='69')&&!state._special12){
+    toast('Activez d’abord le cycle spécial 12 jours 请先启用12天特殊行程');
+    return;
+  }
+  state._cycleRestTarget=key;
+  if(key==='45'||key==='24')state._special12=false;
+  save(state);
+  render2Week();
+  toast(`Repos cycle ${restTargetInfo().label} 已选择`);
+}
+function addCompensation(type){
+  const date=editDate||today();
+  const item={id:String(Date.now())+Math.random().toString(16).slice(2),type,date,due:addDaysStr(date,21),owed:1260,paid:false};
+  compensationItems().push(item);
+  save(state);
+  render2Week();
+  toast(`${compensationLabel(type)} enregistrée 已记录补休债务`);
+}
+function markCompensation(id){
+  const item=compensationItems().find(c=>c.id===id);
+  if(!item)return;
+  item.paid=true;
+  item.paidAt=editDate||today();
+  save(state);
+  render2Week();
+  toast('Compensation marquée comme faite 已标记补休完成');
+}
+
+// ═══════════════════════════════════════════════════════
+// HISTORY
+// ═══════════════════════════════════════════════════════
+function renderHistory(){
+  const el=document.getElementById('history-content');
+  const dates=Object.keys(state).filter(k=>state[k].segs&&state[k].segs.length).sort().reverse();
+  if(!dates.length){
+    el.innerHTML='<div class="empty"><div class="ico">📅</div><p>Aucun historique<br>历史记录为空</p></div>';
+    return;
+  }
+  let h=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+    <span style="font-size:12.5px;color:var(--text2)">${dates.length} journée(s) 条记录</span>
+    <button onclick="exportRange(15)" style="background:none;border:none;color:var(--drive);font-size:12.5px;cursor:pointer;font-family:inherit;font-weight:700">Exporter 15j 导出15天</button>
+    <button onclick="exportRange(30)" style="background:none;border:none;color:var(--drive);font-size:12.5px;cursor:pointer;font-family:inherit;font-weight:700">Exporter 30j 导出30天</button>
+    <button onclick="clearAll()" style="background:none;border:none;color:var(--red);font-size:12.5px;cursor:pointer;font-family:inherit;font-weight:700">Tout effacer 清空</button>
+  </div>`;
+  dates.forEach(k=>{
+    const day=state[k];
+    const segs=day.segs||[];
+    const A=analyzeDay(segs,k);
+    const sc=A.status==='ok'?'bd-ok':A.status==='warn'?'bd-warn':'bd-err';
+    const st=A.status==='ok'?'Conforme 合规':A.status==='warn'?'Attention 注意':'Infraction 违规';
+    const rpClass={norm:'bd-ok',split:'bd-drive',short:'bd-warn',insuf:'bd-err',none:'bd-gray'}[A.restType]||'bd-gray';
+    const rpLab={norm:'Repos N 正常',split:'Repos F 拆分',short:`Repos R ${A.reducedRestCount}/3`,insuf:'Repos! 不足',none:'—'}[A.restType]||'—';
+    const hasCross=segs.some(s=>s.nextDay||effectiveStartNextDay(s));
+    h+=`<div class="hist-item" onclick="jumpToDate('${k}')">
+      <div class="hist-top">
+        <div>
+          <div class="hist-date">${fmtDay(k)}${hasCross?' <span style="font-size:10px;color:var(--drive)">⟶+1j</span>':''}</div>
+          <div class="hist-sub">${[day.client,day.route].filter(Boolean).join(' · ')||'—'}</div>
+        </div>
+        <button class="btn-sm bsm-add" style="padding:5px 8px;flex-shrink:0" onclick="event.stopPropagation();exportDay('${k}')">Export 导出</button>
+        <button class="btn-sm bsm-del" style="padding:5px 8px;flex-shrink:0" onclick="event.stopPropagation();deleteDay('${k}')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
+        </button>
+      </div>
+      ${segs.length?renderTimeline(segs):''}
+      <div class="badges">
+        <span class="badge ${sc}">${st}</span>
+        <span class="badge bd-drive">🚌 ${minHM(A.totalDrive)}</span>
+        <span class="badge ${rpClass}">${rpLab}</span>
+        ${A.totalAmplitude?`<span class="badge bd-gray">Ampl. ${minHM(A.totalAmplitude)}</span>`:''}
+        <span class="badge bd-gray">${segs.length} seg.</span>
+      </div>
+    </div>`;
+  });
+  el.innerHTML=h;
+}
+
+function jumpToDate(date){
+  document.getElementById('r-date').value=date;
+  editDate=date;syncFromDate();goto('today');
+}
+function deleteDay(date){
+  if(!confirm(`Supprimer ${fmtDate(date)}? 删除这天的记录？`))return;
+  delete state[date];save(state);renderHistory();toast('Supprimé 已删除');
+}
+function clearToday(){
+  editDate=normalizeDateInput(document.getElementById('r-date').value);
+  if(!confirm(`Effacer toutes les activités du ${fmtDate(editDate)} ?\\n确认清空这一天的所有活动吗？`))return;
+  if(state._pendingRest&&absToDate(state._pendingRest.startAbs)===editDate)delete state._pendingRest;
+  delete state[editDate];
+  save(state);
+  syncFromDate();
+  toast('Journée effacée 今日已清空');
+}
+function exportDay(date){
+  const day=state[date];
+  if(!day||!day.segs||!day.segs.length){toast('Aucune donnée à exporter 没有可导出记录');return}
+  const A=analyzeDay(day.segs,date);
+  const rows=(day.segs||[]).map(s=>{
+    const t=TYPES[s.type]||TYPES.D;
+    if(s.autoRestOpen)return`<tr><td>${t.label}</td><td>${s.start} → ...</td><td>En cours 日休进行中</td></tr>`;
+    return segmentDisplayParts(s,date).map(p=>`<tr><td>${t.label} ${t.cn}</td><td>${fmtDate(p.date)} ${p.start} → ${p.end}</td><td>${minHM(p.dur)}</td></tr>`).join('');
+  }).join('');
+  const html=`<!doctype html><html><head><meta charset="utf-8"><title>Journal ${fmtDate(date)}</title>
+  <style>body{font-family:system-ui,-apple-system,'PingFang SC',sans-serif;margin:24px;color:#132235}h1{font-size:22px}table{border-collapse:collapse;width:100%;margin-top:16px}td,th{border:1px solid #cbd5e1;padding:8px;text-align:left}th{background:#f1f5f9}.ok{color:#059669}.warn{color:#b45309}.err{color:#dc2626}</style></head><body>
+  <h1>Journal Conducteur - ${fmtDate(date)}</h1>
+  <p><b>Client:</b> ${day.client||'-'}<br><b>Trajet:</b> ${day.route||'-'}<br><b>Service:</b> ${day.svctype||'occ'}</p>
+  <p><b>Conduite jour:</b> ${minHM(A.totalDrive)} · <b>Amplitude:</b> ${minHM(A.totalAmplitude)} · <b>Repos:</b> ${A.restDetail||A.restType}</p>
+  <table><tr><th>Activité</th><th>Horaire</th><th>Durée</th></tr>${rows}</table>
+  <h2>Conformité</h2>${A.issues.map(i=>`<p class="${i.t}">${i.m}</p>`).join('')}
+  <p style="color:#64748b;font-size:12px">Exporté le ${new Date().toLocaleString('fr-FR')}</p>
+  </body></html>`;
+  const blob=new Blob([html],{type:'text/html'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`journal-conducteur-${date}.html`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+  toast('Export téléchargé 已下载记录');
+}
+function exportRange(daysCount){
+  const dates=daysCount===30?get30DayData():getWindowData(daysCount,true);
+  const rows=dates.map(k=>{
+    const day=state[k];
+    if(!day||!day.segs||!day.segs.length)return`<tr><td>${fmtDate(k)}</td><td>—</td><td>—</td><td>—</td></tr>`;
+    const A=analyzeDay(day.segs,k);
+    return`<tr><td>${fmtDate(k)}</td><td>${minHM(A.totalDrive)}</td><td>${minHM(A.totalAmplitude)}</td><td>${A.restDetail||A.restType}</td></tr>`;
+  }).join('');
+  const html=`<!doctype html><html><head><meta charset="utf-8"><title>Journal ${daysCount} jours</title>
+  <style>body{font-family:system-ui,-apple-system,'PingFang SC',sans-serif;margin:24px;color:#132235}table{border-collapse:collapse;width:100%}td,th{border:1px solid #cbd5e1;padding:8px;text-align:left}th{background:#f1f5f9}</style></head><body>
+  <h1>Journal Conducteur - ${daysCount===30?'J-15 à J+15':daysCount+' jours glissants'}</h1>
+  <table><tr><th>Date</th><th>Conduite</th><th>Amplitude</th><th>Repos</th></tr>${rows}</table>
+  <p style="color:#64748b;font-size:12px">Exporté le ${new Date().toLocaleString('fr-FR')}</p>
+  </body></html>`;
+  const blob=new Blob([html],{type:'text/html'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`journal-conducteur-${daysCount}jours.html`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+  toast('Export 30 jours téléchargé 已下载30天报告');
+}
+function clearAll(){
+  if(!confirm('Effacer tout? Irréversible. 清空全部？不可撤销。'))return;
+  Object.keys(state).forEach(k=>delete state[k]);save(state);renderHistory();toast('Effacé 已清空');
+}
+
+// ═══════════════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════════════
+function toast(msg){
+  const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+  clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2400);
+}
+
+// ═══════════════════════════════════════════════════════
+// PWA
+// ═══════════════════════════════════════════════════════
+const manifest={name:'Journal Conducteur Autocar 1.0',short_name:'Conducteur 1.0',start_url:'./',display:'standalone',background_color:'#111c2d',theme_color:'#111c2d',description:'Suivi temps de conduite & conformité CE 561/2006 - version 1.0',icons:[{src:"data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23111c2d'/><text y='.9em' font-size='80'>🚌</text></svg>",sizes:'any',type:'image/svg+xml',purpose:'any maskable'}]};
+const mblob=new Blob([JSON.stringify(manifest)],{type:'application/json'});
+const ml=document.createElement('link');ml.rel='manifest';ml.href=URL.createObjectURL(mblob);document.head.appendChild(ml);
+if('serviceWorker' in navigator){
+  const sw=`const C='cond-v13';const FILES=[self.location.pathname];self.addEventListener('install',e=>e.waitUntil(caches.open(C).then(c=>c.addAll(FILES))));self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==C).map(k=>caches.delete(k))))));self.addEventListener('fetch',e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).catch(()=>new Response('Offline',{status:503})))));`;
+  const swblob=new Blob([sw],{type:'application/javascript'});
+  navigator.serviceWorker.register(URL.createObjectURL(swblob)).catch(()=>{});
+}
+</script>
+</body>
+</html>
